@@ -5,18 +5,22 @@ import { WeatherForm } from '@/components/WeatherForm';
 import { WeatherPrediction } from '@/components/WeatherPrediction';
 import { WeatherHeader } from '@/components/WeatherHeader';
 import { WeatherChart } from '@/components/WeatherChart';
+import { RegionSelector } from '@/components/RegionSelector';
 import { WeatherData } from '@/types/weather';
 import { fetchHistoricalWeather, convertHistoricalToWeatherData } from '@/services/weatherApi';
+import { madagascarRegions, Region } from '@/data/madagascarRegions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, Database } from 'lucide-react';
+import { TrendingUp, Database, AlertCircle } from 'lucide-react';
 
 const Index = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [predictions, setPredictions] = useState<WeatherData[]>([]);
+  const [selectedRegion, setSelectedRegion] = useState<Region | null>(madagascarRegions[1]); // Fianarantsoa par défaut
 
   const { data: historicalWeatherData, isLoading, error } = useQuery({
-    queryKey: ['historicalWeather'],
-    queryFn: fetchHistoricalWeather,
+    queryKey: ['historicalWeather', selectedRegion?.code],
+    queryFn: () => selectedRegion ? fetchHistoricalWeather(selectedRegion) : Promise.resolve(null),
+    enabled: !!selectedRegion,
   });
 
   const historicalData = historicalWeatherData 
@@ -28,6 +32,13 @@ const Index = () => {
     // Améliorer les prédictions avec les données historiques
     const generatedPredictions = generateAdvancedPredictions(data, historicalData);
     setPredictions(generatedPredictions);
+  };
+
+  const handleRegionChange = (region: Region) => {
+    setSelectedRegion(region);
+    // Réinitialiser les prédictions quand on change de région
+    setWeatherData(null);
+    setPredictions([]);
   };
 
   const generateAdvancedPredictions = (baseData: WeatherData, historical: WeatherData[]): WeatherData[] => {
@@ -73,8 +84,15 @@ const Index = () => {
               <Database className="h-5 w-5 text-green-600" />
               <span className="text-sm font-medium">
                 {isLoading && "Chargement des données historiques..."}
-                {error && "Erreur lors du chargement des données"}
-                {historicalData.length > 0 && `${historicalData.length} jours de données historiques chargées`}
+                {error && (
+                  <span className="flex items-center text-red-600">
+                    <AlertCircle className="h-4 w-4 mr-1" />
+                    Erreur lors du chargement des données
+                  </span>
+                )}
+                {historicalData.length > 0 && selectedRegion && 
+                  `${historicalData.length} jours de données historiques pour ${selectedRegion.name}`
+                }
               </span>
               <TrendingUp className="h-5 w-5 text-blue-600" />
             </div>
@@ -82,8 +100,12 @@ const Index = () => {
         </Card>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Formulaire */}
+          {/* Sélecteur de région et formulaire */}
           <div className="xl:col-span-1 space-y-6">
+            <RegionSelector 
+              selectedRegion={selectedRegion}
+              onRegionChange={handleRegionChange}
+            />
             <WeatherForm onSubmit={handleWeatherSubmit} />
           </div>
           
@@ -96,7 +118,7 @@ const Index = () => {
               />
             )}
             
-            {weatherData && predictions.length > 0 && (
+            {weatherData && predictions.length > 0 && selectedRegion && (
               <WeatherPrediction 
                 currentData={weatherData} 
                 predictions={predictions} 

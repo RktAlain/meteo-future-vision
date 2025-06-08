@@ -1,5 +1,6 @@
 
 import { WeatherData } from '@/types/weather';
+import { Region } from '@/data/madagascarRegions';
 
 export interface HistoricalWeatherData {
   daily: {
@@ -10,14 +11,14 @@ export interface HistoricalWeatherData {
   };
 }
 
-export const fetchHistoricalWeather = async (): Promise<HistoricalWeatherData> => {
+export const fetchHistoricalWeather = async (region: Region): Promise<HistoricalWeatherData> => {
   const endDate = new Date();
   const startDate = new Date();
   startDate.setDate(endDate.getDate() - 7);
   
   const formatDate = (date: Date) => date.toISOString().split('T')[0];
   
-  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=-21.4532&longitude=47.0857&start_date=${formatDate(startDate)}&end_date=${formatDate(endDate)}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Africa%2FNairobi`;
+  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${region.latitude}&longitude=${region.longitude}&start_date=${formatDate(startDate)}&end_date=${formatDate(endDate)}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Africa%2FNairobi`;
   
   const response = await fetch(url);
   if (!response.ok) {
