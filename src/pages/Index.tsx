@@ -1,35 +1,58 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { WeatherForm } from '@/components/WeatherForm';
 import { WeatherPrediction } from '@/components/WeatherPrediction';
 import { WeatherHeader } from '@/components/WeatherHeader';
+import { WeatherChart } from '@/components/WeatherChart';
 import { WeatherData } from '@/types/weather';
+import { fetchHistoricalWeather, convertHistoricalToWeatherData } from '@/services/weatherApi';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { TrendingUp, Database } from 'lucide-react';
 
 const Index = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [predictions, setPredictions] = useState<WeatherData[]>([]);
 
+  const { data: historicalWeatherData, isLoading, error } = useQuery({
+    queryKey: ['historicalWeather'],
+    queryFn: fetchHistoricalWeather,
+  });
+
+  const historicalData = historicalWeatherData 
+    ? convertHistoricalToWeatherData(historicalWeatherData)
+    : [];
+
   const handleWeatherSubmit = (data: WeatherData) => {
     setWeatherData(data);
-    // Générer les prédictions pour les 5 prochains jours
-    const generatedPredictions = generatePredictions(data);
+    // Améliorer les prédictions avec les données historiques
+    const generatedPredictions = generateAdvancedPredictions(data, historicalData);
     setPredictions(generatedPredictions);
   };
 
-  const generatePredictions = (baseData: WeatherData): WeatherData[] => {
+  const generateAdvancedPredictions = (baseData: WeatherData, historical: WeatherData[]): WeatherData[] => {
     const predictions: WeatherData[] = [];
+    
+    // Calculer les tendances basées sur les données historiques
+    const tempTrend = historical.length > 1 
+      ? (historical[historical.length - 1].temperature - historical[0].temperature) / historical.length
+      : 0;
+    
+    const precipTrend = historical.length > 1
+      ? historical.reduce((sum, data) => sum + data.precipitation, 0) / historical.length
+      : 0;
     
     for (let i = 1; i <= 5; i++) {
       const prediction: WeatherData = {
-        temperature: baseData.temperature + (Math.random() - 0.5) * 6, // Variation de ±3°C
-        humidity: Math.max(0, Math.min(100, baseData.humidity + (Math.random() - 0.5) * 20)),
-        pressure: baseData.pressure + (Math.random() - 0.5) * 20, // Variation de ±10 hPa
-        windSpeed: Math.max(0, baseData.windSpeed + (Math.random() - 0.5) * 10),
-        windDirection: (baseData.windDirection + (Math.random() - 0.5) * 60) % 360,
-        precipitation: Math.max(0, baseData.precipitation + (Math.random() - 0.5) * 5),
-        cloudCover: Math.max(0, Math.min(100, baseData.cloudCover + (Math.random() - 0.5) * 30)),
-        uvIndex: Math.max(0, Math.min(12, baseData.uvIndex + (Math.random() - 0.5) * 2)),
-        dewPoint: baseData.dewPoint + (Math.random() - 0.5) * 4,
+        temperature: baseData.temperature + (tempTrend * i) + (Math.random() - 0.5) * 4,
+        humidity: Math.max(0, Math.min(100, baseData.humidity + (Math.random() - 0.5) * 15)),
+        pressure: baseData.pressure + (Math.random() - 0.5) * 15,
+        windSpeed: Math.max(0, baseData.windSpeed + (Math.random() - 0.5) * 8),
+        windDirection: (baseData.windDirection + (Math.random() - 0.5) * 45) % 360,
+        precipitation: Math.max(0, precipTrend * 0.8 + (Math.random() - 0.5) * 3),
+        cloudCover: Math.max(0, Math.min(100, baseData.cloudCover + (Math.random() - 0.5) * 25)),
+        uvIndex: Math.max(0, Math.min(12, baseData.uvIndex + (Math.random() - 0.5) * 1.5)),
+        dewPoint: baseData.dewPoint + (Math.random() - 0.5) * 3,
         date: new Date(Date.now() + i * 24 * 60 * 60 * 1000)
       };
       predictions.push(prediction);
@@ -43,12 +66,36 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8">
         <WeatherHeader />
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-          <div className="space-y-6">
+        {/* Indicateur de données historiques */}
+        <Card className="mb-8 backdrop-blur-sm bg-gradient-to-r from-green-500/10 to-blue-500/10 border-0 shadow-lg">
+          <CardContent className="py-4">
+            <div className="flex items-center justify-center space-x-4">
+              <Database className="h-5 w-5 text-green-600" />
+              <span className="text-sm font-medium">
+                {isLoading && "Chargement des données historiques..."}
+                {error && "Erreur lors du chargement des données"}
+                {historicalData.length > 0 && `${historicalData.length} jours de données historiques chargées`}
+              </span>
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          {/* Formulaire */}
+          <div className="xl:col-span-1 space-y-6">
             <WeatherForm onSubmit={handleWeatherSubmit} />
           </div>
           
-          <div className="space-y-6">
+          {/* Graphiques et prédictions */}
+          <div className="xl:col-span-2 space-y-6">
+            {historicalData.length > 0 && predictions.length > 0 && (
+              <WeatherChart 
+                historicalData={historicalData} 
+                predictions={predictions} 
+              />
+            )}
+            
             {weatherData && predictions.length > 0 && (
               <WeatherPrediction 
                 currentData={weatherData} 
