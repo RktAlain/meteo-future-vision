@@ -1,15 +1,13 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { WeatherData } from '@/types/weather';
-import { CloudRain, Thermometer, Wind, CloudDrizzle } from 'lucide-react';
+import { CloudRain, Thermometer, Wind, CloudDrizzle, RefreshCw } from 'lucide-react';
 
 const weatherSchema = z.object({
   temperature: z.number().min(-50).max(60),
@@ -25,9 +23,11 @@ const weatherSchema = z.object({
 
 interface WeatherFormProps {
   onSubmit: (data: WeatherData) => void;
+  currentWeatherData?: WeatherData | null;
+  isLoadingCurrent?: boolean;
 }
 
-export const WeatherForm: React.FC<WeatherFormProps> = ({ onSubmit }) => {
+export const WeatherForm: React.FC<WeatherFormProps> = ({ onSubmit, currentWeatherData, isLoadingCurrent }) => {
   const form = useForm<WeatherData>({
     resolver: zodResolver(weatherSchema),
     defaultValues: {
@@ -43,13 +43,40 @@ export const WeatherForm: React.FC<WeatherFormProps> = ({ onSubmit }) => {
     },
   });
 
+  // Mettre à jour le formulaire avec les données actuelles
+  useEffect(() => {
+    if (currentWeatherData) {
+      form.reset({
+        temperature: Math.round(currentWeatherData.temperature * 10) / 10,
+        humidity: Math.round(currentWeatherData.humidity),
+        pressure: Math.round(currentWeatherData.pressure),
+        windSpeed: Math.round(currentWeatherData.windSpeed * 10) / 10,
+        windDirection: Math.round(currentWeatherData.windDirection),
+        precipitation: Math.round(currentWeatherData.precipitation * 10) / 10,
+        cloudCover: Math.round(currentWeatherData.cloudCover),
+        uvIndex: Math.round(currentWeatherData.uvIndex * 10) / 10,
+        dewPoint: Math.round(currentWeatherData.dewPoint * 10) / 10,
+      });
+    }
+  }, [currentWeatherData, form]);
+
   return (
     <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-xl">
       <CardHeader className="pb-6">
-        <CardTitle className="flex items-center text-xl font-semibold">
-          <Thermometer className="h-5 w-5 mr-2 text-blue-500" />
-          Paramètres Météorologiques
+        <CardTitle className="flex items-center justify-between text-xl font-semibold">
+          <div className="flex items-center">
+            <Thermometer className="h-5 w-5 mr-2 text-blue-500" />
+            Paramètres Météorologiques
+          </div>
+          {isLoadingCurrent && (
+            <RefreshCw className="h-4 w-4 animate-spin text-blue-500" />
+          )}
         </CardTitle>
+        {currentWeatherData && (
+          <p className="text-sm text-green-600 font-medium">
+            ✓ Données actuelles chargées automatiquement
+          </p>
+        )}
       </CardHeader>
       <CardContent>
         <Form {...form}>

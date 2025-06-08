@@ -1,4 +1,3 @@
-
 import { WeatherData } from '@/types/weather';
 import { Region } from '@/data/madagascarRegions';
 
@@ -10,6 +9,49 @@ export interface HistoricalWeatherData {
     precipitation_sum: number[];
   };
 }
+
+export interface CurrentWeatherData {
+  current: {
+    time: string;
+    temperature_2m: number;
+    relative_humidity_2m: number;
+    surface_pressure: number;
+    wind_speed_10m: number;
+    wind_direction_10m: number;
+    precipitation: number;
+    cloud_cover: number;
+    uv_index: number;
+    dew_point_2m: number;
+  };
+}
+
+export const fetchCurrentWeather = async (region: Region): Promise<CurrentWeatherData> => {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${region.latitude}&longitude=${region.longitude}&current=temperature_2m,relative_humidity_2m,surface_pressure,wind_speed_10m,wind_direction_10m,precipitation,cloud_cover,uv_index,dew_point_2m&timezone=Africa%2FNairobi`;
+  
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Erreur lors de la récupération des données météorologiques actuelles');
+  }
+  
+  return response.json();
+};
+
+export const convertCurrentToWeatherData = (currentData: CurrentWeatherData): WeatherData => {
+  const { current } = currentData;
+  
+  return {
+    temperature: current.temperature_2m,
+    humidity: current.relative_humidity_2m,
+    pressure: current.surface_pressure,
+    windSpeed: current.wind_speed_10m,
+    windDirection: current.wind_direction_10m,
+    precipitation: current.precipitation || 0,
+    cloudCover: current.cloud_cover,
+    uvIndex: current.uv_index || 0,
+    dewPoint: current.dew_point_2m,
+    date: new Date(current.time)
+  };
+};
 
 export const fetchHistoricalWeather = async (region: Region): Promise<HistoricalWeatherData> => {
   const endDate = new Date();

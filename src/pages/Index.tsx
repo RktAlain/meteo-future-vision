@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { WeatherForm } from '@/components/WeatherForm';
@@ -7,25 +6,42 @@ import { WeatherHeader } from '@/components/WeatherHeader';
 import { WeatherChart } from '@/components/WeatherChart';
 import { RegionSelector } from '@/components/RegionSelector';
 import { WeatherData } from '@/types/weather';
-import { fetchHistoricalWeather, convertHistoricalToWeatherData } from '@/services/weatherApi';
+import { 
+  fetchHistoricalWeather, 
+  convertHistoricalToWeatherData,
+  fetchCurrentWeather,
+  convertCurrentToWeatherData
+} from '@/services/weatherApi';
 import { madagascarRegions, Region } from '@/data/madagascarRegions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, Database, AlertCircle } from 'lucide-react';
+import { TrendingUp, Database, AlertCircle, CloudSun } from 'lucide-react';
 
 const Index = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [predictions, setPredictions] = useState<WeatherData[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(madagascarRegions[1]); // Fianarantsoa par défaut
 
-  const { data: historicalWeatherData, isLoading, error } = useQuery({
+  // Récupérer les données historiques
+  const { data: historicalWeatherData, isLoading: isLoadingHistorical, error: historicalError } = useQuery({
     queryKey: ['historicalWeather', selectedRegion?.code],
     queryFn: () => selectedRegion ? fetchHistoricalWeather(selectedRegion) : Promise.resolve(null),
+    enabled: !!selectedRegion,
+  });
+
+  // Récupérer les données actuelles
+  const { data: currentWeatherData, isLoading: isLoadingCurrent, error: currentError } = useQuery({
+    queryKey: ['currentWeather', selectedRegion?.code],
+    queryFn: () => selectedRegion ? fetchCurrentWeather(selectedRegion) : Promise.resolve(null),
     enabled: !!selectedRegion,
   });
 
   const historicalData = historicalWeatherData 
     ? convertHistoricalToWeatherData(historicalWeatherData)
     : [];
+
+  const currentData = currentWeatherData 
+    ? convertCurrentToWeatherData(currentWeatherData)
+    : null;
 
   const handleWeatherSubmit = (data: WeatherData) => {
     setWeatherData(data);
@@ -77,27 +93,52 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8">
         <WeatherHeader />
         
-        {/* Indicateur de données historiques */}
-        <Card className="mb-8 backdrop-blur-sm bg-gradient-to-r from-green-500/10 to-blue-500/10 border-0 shadow-lg">
-          <CardContent className="py-4">
-            <div className="flex items-center justify-center space-x-4">
-              <Database className="h-5 w-5 text-green-600" />
-              <span className="text-sm font-medium">
-                {isLoading && "Chargement des données historiques..."}
-                {error && (
-                  <span className="flex items-center text-red-600">
-                    <AlertCircle className="h-4 w-4 mr-1" />
-                    Erreur lors du chargement des données
-                  </span>
-                )}
-                {historicalData.length > 0 && selectedRegion && 
-                  `${historicalData.length} jours de données historiques pour ${selectedRegion.name}`
-                }
-              </span>
-              <TrendingUp className="h-5 w-5 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Indicateur de données */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {/* Données historiques */}
+          <Card className="backdrop-blur-sm bg-gradient-to-r from-green-500/10 to-blue-500/10 border-0 shadow-lg">
+            <CardContent className="py-4">
+              <div className="flex items-center justify-center space-x-4">
+                <Database className="h-5 w-5 text-green-600" />
+                <span className="text-sm font-medium">
+                  {isLoadingHistorical && "Chargement des données historiques..."}
+                  {historicalError && (
+                    <span className="flex items-center text-red-600">
+                      <AlertCircle className="h-4 w-4 mr-1" />
+                      Erreur historique
+                    </span>
+                  )}
+                  {historicalData.length > 0 && selectedRegion && 
+                    `${historicalData.length} jours historiques - ${selectedRegion.name}`
+                  }
+                </span>
+                <TrendingUp className="h-5 w-5 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Données actuelles */}
+          <Card className="backdrop-blur-sm bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-0 shadow-lg">
+            <CardContent className="py-4">
+              <div className="flex items-center justify-center space-x-4">
+                <CloudSun className="h-5 w-5 text-blue-600" />
+                <span className="text-sm font-medium">
+                  {isLoadingCurrent && "Chargement des données actuelles..."}
+                  {currentError && (
+                    <span className="flex items-center text-red-600">
+                      <AlertCircle className="h-4 w-4 mr-1" />
+                      Erreur données actuelles
+                    </span>
+                  )}
+                  {currentData && selectedRegion && 
+                    `Données en temps réel - ${selectedRegion.name}`
+                  }
+                </span>
+                <TrendingUp className="h-5 w-5 text-purple-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Sélecteur de région et formulaire */}
@@ -106,7 +147,11 @@ const Index = () => {
               selectedRegion={selectedRegion}
               onRegionChange={handleRegionChange}
             />
-            <WeatherForm onSubmit={handleWeatherSubmit} />
+            <WeatherForm 
+              onSubmit={handleWeatherSubmit} 
+              currentWeatherData={currentData}
+              isLoadingCurrent={isLoadingCurrent}
+            />
           </div>
           
           {/* Graphiques et prédictions */}
