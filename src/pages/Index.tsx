@@ -35,13 +35,13 @@ const Index = () => {
     enabled: !!selectedRegion,
   });
 
-  const historicalData = historicalWeatherData 
-    ? convertHistoricalToWeatherData(historicalWeatherData)
-    : [];
-
   const currentData = currentWeatherData 
     ? convertCurrentToWeatherData(currentWeatherData)
     : null;
+
+  const historicalData = historicalWeatherData 
+    ? convertHistoricalToWeatherData(historicalWeatherData, currentData)
+    : [];
 
   const handleWeatherSubmit = (data: WeatherData) => {
     setWeatherData(data);

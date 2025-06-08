@@ -1,3 +1,4 @@
+
 import { WeatherData } from '@/types/weather';
 import { Region } from '@/data/madagascarRegions';
 
@@ -70,19 +71,44 @@ export const fetchHistoricalWeather = async (region: Region): Promise<Historical
   return response.json();
 };
 
-export const convertHistoricalToWeatherData = (historicalData: HistoricalWeatherData): WeatherData[] => {
+export const convertHistoricalToWeatherData = (historicalData: HistoricalWeatherData, currentData?: WeatherData): WeatherData[] => {
   const { daily } = historicalData;
+  const today = new Date().toISOString().split('T')[0];
   
-  return daily.time.map((date, index) => ({
-    temperature: (daily.temperature_2m_max[index] + daily.temperature_2m_min[index]) / 2,
-    humidity: 60, // Valeur par défaut
-    pressure: 1013, // Valeur par défaut
-    windSpeed: 10, // Valeur par défaut
-    windDirection: 180, // Valeur par défaut
-    precipitation: daily.precipitation_sum[index] || 0,
-    cloudCover: daily.precipitation_sum[index] > 0 ? 80 : 30,
-    uvIndex: 5, // Valeur par défaut
-    dewPoint: daily.temperature_2m_min[index] - 2,
-    date: new Date(date)
-  }));
+  return daily.time.map((date, index) => {
+    const isToday = date === today;
+    
+    // Si c'est aujourd'hui et qu'on a des données actuelles, les utiliser
+    if (isToday && currentData && (daily.temperature_2m_max[index] === null || daily.temperature_2m_min[index] === null)) {
+      return {
+        temperature: currentData.temperature,
+        humidity: currentData.humidity,
+        pressure: currentData.pressure,
+        windSpeed: currentData.windSpeed,
+        windDirection: currentData.windDirection,
+        precipitation: currentData.precipitation,
+        cloudCover: currentData.cloudCover,
+        uvIndex: currentData.uvIndex,
+        dewPoint: currentData.dewPoint,
+        date: new Date(date)
+      };
+    }
+    
+    // Sinon, utiliser les données historiques normalement
+    const tempMax = daily.temperature_2m_max[index];
+    const tempMin = daily.temperature_2m_min[index];
+    
+    return {
+      temperature: tempMax && tempMin ? (tempMax + tempMin) / 2 : (currentData?.temperature || 20),
+      humidity: 60, // Valeur par défaut
+      pressure: 1013, // Valeur par défaut
+      windSpeed: 10, // Valeur par défaut
+      windDirection: 180, // Valeur par défaut
+      precipitation: daily.precipitation_sum[index] || 0,
+      cloudCover: daily.precipitation_sum[index] > 0 ? 80 : 30,
+      uvIndex: 5, // Valeur par défaut
+      dewPoint: tempMin ? tempMin - 2 : (currentData?.dewPoint || 12),
+      date: new Date(date)
+    };
+  });
 };
