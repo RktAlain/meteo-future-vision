@@ -158,8 +158,8 @@ const ModelExplanation = () => {
                   <br />
                   <p><strong>Facteur humidité :</strong></p>
                   <ul className="list-disc list-inside space-y-1">
-                    <li>Si H > 80% → facteur = 1.5</li>
-                    <li>Si H < 40% → facteur = 0.3</li>
+                    <li>Si H {`>`} 80% → facteur = 1.5</li>
+                    <li>Si H {`<`} 40% → facteur = 0.3</li>
                     <li>Sinon → facteur = 1.0</li>
                   </ul>
                 </div>
@@ -185,8 +185,8 @@ const ModelExplanation = () => {
                     Nuages(j) = pattern_historique + impact_précipitations + effet_humidité
                   </p>
                   <ul className="text-xs mt-2 space-y-1">
-                    <li>• Précipitations > 5mm → +20% nuages</li>
-                    <li>• Précipitations > 1mm → +10% nuages</li>
+                    <li>• Précipitations {`>`} 5mm → +20% nuages</li>
+                    <li>• Précipitations {`>`} 1mm → +10% nuages</li>
                     <li>• Humidité influence: (H-60) × 0.5</li>
                   </ul>
                 </div>
