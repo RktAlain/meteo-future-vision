@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useNavigate } from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { WeatherForm } from '@/components/WeatherForm';
 import { WeatherPrediction } from '@/components/WeatherPrediction';
