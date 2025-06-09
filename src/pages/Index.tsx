@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useNavigate } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { WeatherForm } from '@/components/WeatherForm';
 import { WeatherPrediction } from '@/components/WeatherPrediction';
@@ -18,11 +17,14 @@ import { analyzeTrends, generatePredictions } from '@/utils/predictionModel';
 import { madagascarRegions, Region } from '@/data/madagascarRegions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Database, AlertCircle, CloudSun } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Brain } from 'lucide-react';
 
 const Index = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [predictions, setPredictions] = useState<WeatherData[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(madagascarRegions[1]); // Fianarantsoa par défaut
+  const navigate = useNavigate();
 
   // Récupérer les données historiques
   const { data: historicalWeatherData, isLoading: isLoadingHistorical, error: historicalError } = useQuery({
@@ -72,11 +74,22 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <WeatherHeader />
-          <WeatherVoiceNotification 
-            currentData={currentData}
-            predictions={predictions}
-            selectedRegion={selectedRegion?.name}
-          />
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/model')}
+              className="flex items-center gap-2"
+            >
+              <Brain className="h-4 w-4" />
+              Modèle IA
+            </Button>
+            <WeatherVoiceNotification 
+              currentData={currentData}
+              predictions={predictions}
+              selectedRegion={selectedRegion?.name}
+            />
+          </div>
         </div>
         
         {/* Indicateur de données */}
