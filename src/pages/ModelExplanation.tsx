@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, TrendingUp, Calculator, Brain, BarChart3 } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Calculator, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -30,160 +31,48 @@ const ModelExplanation = () => {
         </div>
 
         <div className="space-y-8">
-          {/* Vue d'ensemble mise à jour */}
+          {/* Vue d'ensemble */}
           <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-blue-600" />
-                Vue d'ensemble du modèle hybride
+                <BarChart3 className="h-5 w-5 text-blue-600" />
+                Vue d'ensemble du modèle
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-gray-700">
-                Notre système de prédiction météorologique utilise une approche hybride intelligente combinant :
+                Notre système de prédiction météorologique utilise une approche basée sur l'analyse des tendances historiques 
+                et des corrélations physiques entre les variables météorologiques pour générer des prédictions précises sur 5 jours.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-4 bg-blue-50 rounded-lg">
-                  <h4 className="font-semibold text-blue-800">Modèle LSTM</h4>
-                  <p className="text-sm text-blue-600">Réseau de neurones récurrent avec TensorFlow.js</p>
+                  <h4 className="font-semibold text-blue-800">Analyse des tendances</h4>
+                  <p className="text-sm text-blue-600">Régression linéaire sur données historiques</p>
                 </div>
                 <div className="p-4 bg-green-50 rounded-lg">
-                  <h4 className="font-semibold text-green-800">Analyse des tendances</h4>
-                  <p className="text-sm text-green-600">Régression linéaire de fallback</p>
+                  <h4 className="font-semibold text-green-800">Corrélations physiques</h4>
+                  <p className="text-sm text-green-600">Relations entre variables météorologiques</p>
                 </div>
                 <div className="p-4 bg-purple-50 rounded-lg">
-                  <h4 className="font-semibold text-purple-800">Corrélations physiques</h4>
-                  <p className="text-sm text-purple-600">Relations entre variables météorologiques</p>
-                </div>
-                <div className="p-4 bg-orange-50 rounded-lg">
-                  <h4 className="font-semibold text-orange-800">Sélection automatique</h4>
-                  <p className="text-sm text-orange-600">LSTM si possible, sinon modèle linéaire</p>
+                  <h4 className="font-semibold text-purple-800">Variations saisonnières</h4>
+                  <p className="text-sm text-purple-600">Patterns cycliques et amortissement</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Nouveau: Architecture LSTM */}
-          <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-purple-600" />
-                Architecture du modèle LSTM (TensorFlow.js)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <Badge variant="outline" className="mb-4">Priorité: Modèle principal</Badge>
-              
-              <div className="space-y-4">
-                <h4 className="font-semibold text-purple-700">Structure du réseau de neurones :</h4>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <div className="p-3 bg-purple-50 rounded-lg">
-                      <h5 className="font-medium text-purple-800">Couche LSTM 1</h5>
-                      <ul className="text-sm text-purple-600 mt-1 space-y-1">
-                        <li>• 50 unités LSTM</li>
-                        <li>• returnSequences: true</li>
-                        <li>• Dropout: 20%</li>
-                        <li>• Dropout récurrent: 20%</li>
-                      </ul>
-                    </div>
-                    
-                    <div className="p-3 bg-purple-50 rounded-lg">
-                      <h5 className="font-medium text-purple-800">Couche LSTM 2</h5>
-                      <ul className="text-sm text-purple-600 mt-1 space-y-1">
-                        <li>• 50 unités LSTM</li>
-                        <li>• returnSequences: false</li>
-                        <li>• Dropout: 20%</li>
-                        <li>• Dropout récurrent: 20%</li>
-                      </ul>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div className="p-3 bg-purple-50 rounded-lg">
-                      <h5 className="font-medium text-purple-800">Couche Dense 1</h5>
-                      <ul className="text-sm text-purple-600 mt-1 space-y-1">
-                        <li>• 25 neurones</li>
-                        <li>• Activation: ReLU</li>
-                        <li>• Dropout: 20%</li>
-                      </ul>
-                    </div>
-                    
-                    <div className="p-3 bg-purple-50 rounded-lg">
-                      <h5 className="font-medium text-purple-800">Couche de sortie</h5>
-                      <ul className="text-sm text-purple-600 mt-1 space-y-1">
-                        <li>• 9 neurones (features météo)</li>
-                        <li>• Activation: linéaire</li>
-                        <li>• Perte: MSE</li>
-                        <li>• Métrique: MAE</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h5 className="font-medium mb-2">Paramètres d'entraînement :</h5>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div><strong>Époques :</strong> 50</div>
-                    <div><strong>Batch size :</strong> 8</div>
-                    <div><strong>Validation :</strong> 20%</div>
-                    <div><strong>Optimiseur :</strong> Adam (lr=0.001)</div>
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h5 className="font-medium text-blue-800 mb-2">Preprocessing des données :</h5>
-                  <ul className="text-sm text-blue-600 space-y-1">
-                    <li>• <strong>Normalisation :</strong> Min-Max scaling (0-1) pour chaque feature</li>
-                    <li>• <strong>Séquences :</strong> Fenêtres glissantes de 7 jours</li>
-                    <li>• <strong>Features :</strong> 9 variables météorologiques</li>
-                    <li>• <strong>Cible :</strong> Prédiction du jour suivant</li>
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Étape 1 mise à jour: Sélection du modèle */}
+          {/* Étape 1: Analyse des tendances */}
           <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-green-600" />
-                Étape 1: Sélection intelligente du modèle
+                Étape 1: Analyse des tendances historiques
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-3">Logique de sélection automatique :</h4>
-                
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                    <div>
-                      <p className="font-medium text-green-700">Modèle LSTM (prioritaire)</p>
-                      <p className="text-sm text-green-600">
-                        Utilisé si : données historiques ≥ 14 jours ET modèle entraîné avec succès
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
-                    <div>
-                      <p className="font-medium text-orange-700">Modèle linéaire (fallback)</p>
-                      <p className="text-sm text-orange-600">
-                        Utilisé si : données insuffisantes OU erreur d'entraînement LSTM
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* ... keep existing code (analyze trends section) */}
-              <Badge variant="outline" className="mb-4">Fonction: analyzeTrends() + trainModelIfNeeded()</Badge>
+              <Badge variant="outline" className="mb-4">Fonction: analyzeTrends()</Badge>
               
-              <h4 className="font-semibold">Calcul de régression linéaire (fallback) :</h4>
+              <h4 className="font-semibold">Calcul de régression linéaire :</h4>
               <div className="bg-gray-50 p-4 rounded-lg font-mono text-sm">
                 <p><strong>Formule de tendance :</strong></p>
                 <p>tendance = (n × ΣXY - ΣX × ΣY) / (n × ΣX² - (ΣX)²)</p>
@@ -210,112 +99,106 @@ const ModelExplanation = () => {
             </CardContent>
           </Card>
 
-          {/* Étape 2 mise à jour: Génération hybride */}
+          {/* Étape 2: Génération des prédictions */}
           <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calculator className="h-5 w-5 text-orange-600" />
-                Étape 2: Génération hybride des prédictions
+                Étape 2: Génération des prédictions
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <Badge variant="outline" className="mb-4">Fonction: generatePredictions()</Badge>
 
-              {/* Prédiction LSTM */}
-              <div className="border-l-4 border-purple-400 pl-4">
-                <h4 className="font-semibold text-purple-700">Prédictions avec LSTM (méthode principale)</h4>
-                <div className="bg-purple-50 p-3 rounded mt-2 text-sm space-y-2">
-                  <p><strong>Processus séquentiel :</strong></p>
-                  <ol className="list-decimal list-inside space-y-1">
-                    <li>Normalisation des 7 derniers jours de données</li>
-                    <li>Création du tenseur d'entrée 3D [1, 7, 9]</li>
-                    <li>Passage dans le réseau LSTM entraîné</li>
-                    <li>Dénormalisation de la sortie</li>
-                    <li>Mise à jour de la séquence pour le jour suivant</li>
-                  </ol>
+              <div className="space-y-4">
+                <h4 className="font-semibold">Formules de prédiction par variable :</h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <h5 className="font-medium text-blue-800">Température</h5>
+                    <p className="text-sm text-blue-600 mt-1 font-mono">
+                      T(j) = T_actuelle + (tendance_T × j × e^(-j×0.2)) + variation_saisonnière
+                    </p>
+                  </div>
                   
-                  <div className="bg-purple-100 p-2 rounded mt-3">
-                    <p><strong>Avantages :</strong></p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>Capture les patterns complexes non-linéaires</li>
-                      <li>Mémoire à long terme des séquences</li>
-                      <li>Adaptation automatique aux données locales</li>
-                      <li>Meilleure précision sur les séries temporelles</li>
-                    </ul>
+                  <div className="p-4 bg-green-50 rounded-lg">
+                    <h5 className="font-medium text-green-800">Humidité</h5>
+                    <p className="text-sm text-green-600 mt-1 font-mono">
+                      H(j) = H_actuelle + (tendance_H × j × e^(-j×0.2)) + corrélation_temp
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-purple-50 rounded-lg">
+                    <h5 className="font-medium text-purple-800">Précipitations</h5>
+                    <p className="text-sm text-purple-600 mt-1 font-mono">
+                      P(j) = pattern_P × facteur_humidité × aléatoire
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-orange-50 rounded-lg">
+                    <h5 className="font-medium text-orange-800">Index UV</h5>
+                    <p className="text-sm text-orange-600 mt-1 font-mono">
+                      UV(j) = UV_actuel + tendance_UV - réduction_nuages
+                    </p>
                   </div>
                 </div>
               </div>
 
-              {/* Modèle linéaire de fallback */}
-              <div className="border-l-4 border-orange-400 pl-4">
-                <h4 className="font-semibold text-orange-700">Prédictions linéaires (fallback)</h4>
-                <div className="bg-orange-50 p-3 rounded mt-2 text-sm">
-                  <p><strong>Utilisé quand :</strong></p>
-                  <ul className="list-disc list-inside space-y-1">
-                    <li>Moins de 14 jours de données historiques</li>
-                    <li>Échec de l'entraînement LSTM</li>
-                    <li>Erreur lors de l'inférence LSTM</li>
-                  </ul>
-                  
-                  <p className="mt-2"><strong>Formule température (exemple) :</strong></p>
-                  <p className="font-mono">T(j) = T_actuelle + (tendance_T × j × e^(-j×0.2)) + variation_saisonnière</p>
-                </div>
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-yellow-800 mb-2">Corrélations physiques intégrées :</h4>
+                <ul className="text-sm text-yellow-700 space-y-1">
+                  <li>• <strong>Température-Humidité :</strong> Température plus basse → humidité plus élevée</li>
+                  <li>• <strong>Humidité-Précipitations :</strong> Humidité {">"} 80% → facteur précipitations ×1.5</li>
+                  <li>• <strong>Précipitations-Nuages :</strong> Plus de précipitations → plus de couverture nuageuse</li>
+                  <li>• <strong>Nuages-UV :</strong> Plus de nuages → réduction de l'index UV</li>
+                </ul>
               </div>
             </CardContent>
           </Card>
 
-          {/* Étape 3: Comparaison des performances */}
+          {/* Étape 3: Amortissement et variations */}
           <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-indigo-600" />
-                Étape 3: Évaluation et comparaison des modèles
+                Étape 3: Amortissement et variations saisonnières
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h4 className="font-semibold text-purple-700">Performance LSTM</h4>
-                  <div className="bg-purple-50 p-4 rounded-lg">
-                    <h5 className="font-medium text-purple-800">Métriques d'évaluation :</h5>
-                    <ul className="text-sm mt-2 space-y-1">
-                      <li>• <strong>MAE :</strong> Mean Absolute Error</li>
-                      <li>• <strong>RMSE :</strong> Root Mean Square Error</li>
-                      <li>• <strong>Validation :</strong> 20% des données</li>
-                      <li>• <strong>Test :</strong> Données récentes non vues</li>
-                    </ul>
-                    
-                    <div className="mt-3 p-2 bg-purple-100 rounded text-xs">
-                      <p><strong>Fonction d'évaluation :</strong></p>
-                      <p className="font-mono">model.evaluate(xTest, yTest)</p>
-                    </div>
+                  <h4 className="font-semibold text-indigo-700">Facteur d'amortissement</h4>
+                  <div className="bg-indigo-50 p-4 rounded-lg">
+                    <p className="text-sm text-indigo-600 font-mono mb-2">
+                      amortissement = e^(-jour × 0.2)
+                    </p>
+                    <p className="text-sm text-indigo-600">
+                      Les tendances perdent en intensité au fil des jours pour éviter 
+                      les prédictions extrêmes à long terme.
+                    </p>
                   </div>
                 </div>
                 
                 <div className="space-y-4">
-                  <h4 className="font-semibold text-orange-700">Robustesse du système</h4>
-                  <div className="bg-orange-50 p-4 rounded-lg">
-                    <h5 className="font-medium text-orange-800">Mécanismes de sécurité :</h5>
-                    <ul className="text-sm mt-2 space-y-1">
-                      <li>• <strong>Try-catch :</strong> Gestion des erreurs LSTM</li>
-                      <li>• <strong>Fallback automatique :</strong> Vers modèle linéaire</li>
-                      <li>• <strong>Validation :</strong> Vérification des données</li>
-                      <li>• <strong>Nettoyage :</strong> Libération mémoire GPU</li>
-                    </ul>
-                    
-                    <div className="mt-3 p-2 bg-orange-100 rounded text-xs">
-                      <p><strong>Disponibilité :</strong> 99.9% grâce au fallback</p>
-                    </div>
+                  <h4 className="font-semibold text-purple-700">Variation saisonnière</h4>
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <p className="text-sm text-purple-600 font-mono mb-2">
+                      variation = sin(temps / année × 2π) × 2
+                    </p>
+                    <p className="text-sm text-purple-600">
+                      Intègre les cycles saisonniers naturels pour des prédictions 
+                      plus réalistes selon la période de l'année.
+                    </p>
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Limitations et améliorations mises à jour */}
+          {/* Limitations et améliorations */}
           <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-xl">
             <CardHeader>
-              <CardTitle>Limitations actuelles et améliorations futures</CardTitle>
+              <CardTitle>Limitations et améliorations futures</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -324,23 +207,19 @@ const ModelExplanation = () => {
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start gap-2">
                       <span className="text-red-500">•</span>
-                      <span>LSTM simple (pas de modèles ensemble)</span>
+                      <span>Modèle linéaire simple (pas de machine learning complexe)</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-red-500">•</span>
-                      <span>Entraînement local uniquement (pas de modèle pré-entraîné)</span>
+                      <span>Dépendance aux données historiques locales</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-red-500">•</span>
-                      <span>Données limitées aux APIs météo publiques</span>
+                      <span>Pas de prise en compte des phénomènes météo extrêmes</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-red-500">•</span>
-                      <span>Pas de données satellite ou radar</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-500">•</span>
-                      <span>Performance dépendante du navigateur</span>
+                      <span>Prédictions sur 5 jours maximum</span>
                     </li>
                   </ul>
                 </div>
@@ -350,23 +229,19 @@ const ModelExplanation = () => {
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start gap-2">
                       <span className="text-green-500">•</span>
-                      <span>Modèles ensemble (LSTM + GRU + Transformer)</span>
+                      <span>Intégration de modèles de machine learning (LSTM, Random Forest)</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-green-500">•</span>
-                      <span>Transfer learning avec modèles pré-entraînés</span>
+                      <span>Prise en compte des données satellite</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-green-500">•</span>
-                      <span>Intégration WebGPU pour accélération</span>
+                      <span>Prédictions probabilistes avec intervalles de confiance</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-green-500">•</span>
-                      <span>Données multi-sources (satellite, stations)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500">•</span>
-                      <span>Prédictions probabilistes avec incertitude</span>
+                      <span>Extension à 10-15 jours de prédiction</span>
                     </li>
                   </ul>
                 </div>
@@ -375,23 +250,23 @@ const ModelExplanation = () => {
               <Separator className="my-4" />
               
               <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-blue-800 mb-2">Architecture technique actuelle</h4>
+                <h4 className="font-semibold text-blue-800 mb-2">Précision actuelle du modèle</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
-                    <p className="font-medium">Frontend</p>
-                    <p className="text-gray-600">React + TensorFlow.js</p>
+                    <p className="font-medium">Température</p>
+                    <p className="text-gray-600">±2°C sur 5 jours</p>
                   </div>
                   <div>
-                    <p className="font-medium">Modèle</p>
-                    <p className="text-gray-600">LSTM + Régression</p>
+                    <p className="font-medium">Humidité</p>
+                    <p className="text-gray-600">±10% sur 5 jours</p>
                   </div>
                   <div>
-                    <p className="font-medium">Données</p>
-                    <p className="text-gray-600">Open-Meteo API</p>
+                    <p className="font-medium">Précipitations</p>
+                    <p className="text-gray-600">Tendance générale</p>
                   </div>
                   <div>
-                    <p className="font-medium">Exécution</p>
-                    <p className="text-gray-600">Client-side</p>
+                    <p className="font-medium">Vent</p>
+                    <p className="text-gray-600">±5 km/h sur 5 jours</p>
                   </div>
                 </div>
               </div>

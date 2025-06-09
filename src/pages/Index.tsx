@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -14,19 +15,16 @@ import {
   fetchCurrentWeather,
   convertCurrentToWeatherData
 } from '@/services/weatherApi';
-import { analyzeTrends, generatePredictions, trainModelIfNeeded, getLSTMModelStatus } from '@/utils/predictionModel';
+import { analyzeTrends, generatePredictions } from '@/utils/predictionModel';
 import { madagascarRegions, Region } from '@/data/madagascarRegions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, Database, AlertCircle, CloudSun, Brain, Zap } from 'lucide-react';
+import { TrendingUp, Database, AlertCircle, CloudSun, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 
 const Index = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [predictions, setPredictions] = useState<WeatherData[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(madagascarRegions[1]);
-  const [trainingProgress, setTrainingProgress] = useState<{ epoch: number; loss: number } | null>(null);
-  const [isTrainingLSTM, setIsTrainingLSTM] = useState(false);
   const navigate = useNavigate();
 
   // Récupérer les données historiques
@@ -51,29 +49,12 @@ const Index = () => {
     ? convertHistoricalToWeatherData(historicalWeatherData, currentData)
     : [];
 
-  const handleWeatherSubmit = async (data: WeatherData) => {
+  const handleWeatherSubmit = (data: WeatherData) => {
     setWeatherData(data);
     
     if (historicalData.length > 0) {
       const trends = analyzeTrends(historicalData, data);
-      
-      // Entraîner le modèle LSTM si nécessaire
-      if (historicalData.length >= 14) {
-        setIsTrainingLSTM(true);
-        try {
-          await trainModelIfNeeded(historicalData, (epoch, loss) => {
-            setTrainingProgress({ epoch, loss });
-          });
-        } catch (error) {
-          console.error('Erreur lors de l\'entraînement:', error);
-        } finally {
-          setIsTrainingLSTM(false);
-          setTrainingProgress(null);
-        }
-      }
-      
-      // Générer les prédictions (LSTM ou linéaire)
-      const generatedPredictions = await generatePredictions(data, historicalData, trends);
+      const generatedPredictions = generatePredictions(data, historicalData, trends);
       setPredictions(generatedPredictions);
       
       console.log('Tendances analysées:', trends);
@@ -85,10 +66,7 @@ const Index = () => {
     setSelectedRegion(region);
     setWeatherData(null);
     setPredictions([]);
-    setTrainingProgress(null);
   };
-
-  const lstmStatus = getLSTMModelStatus();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-indigo-100">
@@ -113,9 +91,8 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Indicateurs de données et modèle */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {/* Données historiques */}
+        {/* Indicateurs de données */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <Card className="backdrop-blur-sm bg-gradient-to-r from-green-500/10 to-blue-500/10 border-0 shadow-lg">
             <CardContent className="py-4">
               <div className="flex items-center justify-center space-x-4">
@@ -137,7 +114,6 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          {/* Données actuelles */}
           <Card className="backdrop-blur-sm bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-0 shadow-lg">
             <CardContent className="py-4">
               <div className="flex items-center justify-center space-x-4">
@@ -158,43 +134,7 @@ const Index = () => {
               </div>
             </CardContent>
           </Card>
-
-          {/* Statut du modèle LSTM */}
-          <Card className="backdrop-blur-sm bg-gradient-to-r from-orange-500/10 to-red-500/10 border-0 shadow-lg">
-            <CardContent className="py-4">
-              <div className="flex items-center justify-center space-x-4">
-                <Zap className="h-5 w-5 text-orange-600" />
-                <span className="text-sm font-medium">
-                  {isTrainingLSTM && "Entraînement LSTM en cours..."}
-                  {lstmStatus.isReady && !isTrainingLSTM && "Modèle LSTM prêt"}
-                  {!lstmStatus.isReady && !isTrainingLSTM && "Modèle linéaire actif"}
-                </span>
-                <Brain className="h-5 w-5 text-red-600" />
-              </div>
-            </CardContent>
-          </Card>
         </div>
-
-        {/* Progression de l'entraînement */}
-        {trainingProgress && (
-          <Card className="mb-6 backdrop-blur-sm bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <Brain className="h-4 w-4" />
-                Entraînement du modèle LSTM
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Époque {trainingProgress.epoch + 1}/50</span>
-                  <span>Perte: {trainingProgress.loss.toFixed(4)}</span>
-                </div>
-                <Progress value={((trainingProgress.epoch + 1) / 50) * 100} />
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Sélecteur de région et formulaire */}
