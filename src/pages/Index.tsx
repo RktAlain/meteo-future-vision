@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { WeatherForm } from '@/components/WeatherForm';
@@ -12,6 +13,7 @@ import {
   fetchCurrentWeather,
   convertCurrentToWeatherData
 } from '@/services/weatherApi';
+import { analyzeTrends, generatePredictions } from '@/utils/predictionModel';
 import { madagascarRegions, Region } from '@/data/madagascarRegions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Database, AlertCircle, CloudSun } from 'lucide-react';
@@ -45,9 +47,16 @@ const Index = () => {
 
   const handleWeatherSubmit = (data: WeatherData) => {
     setWeatherData(data);
-    // Améliorer les prédictions avec les données historiques
-    const generatedPredictions = generateAdvancedPredictions(data, historicalData);
-    setPredictions(generatedPredictions);
+    
+    // Générer les prédictions basées sur les données réelles
+    if (historicalData.length > 0) {
+      const trends = analyzeTrends(historicalData, data);
+      const generatedPredictions = generatePredictions(data, historicalData, trends);
+      setPredictions(generatedPredictions);
+      
+      console.log('Tendances analysées:', trends);
+      console.log('Prédictions générées:', generatedPredictions);
+    }
   };
 
   const handleRegionChange = (region: Region) => {
@@ -55,37 +64,6 @@ const Index = () => {
     // Réinitialiser les prédictions quand on change de région
     setWeatherData(null);
     setPredictions([]);
-  };
-
-  const generateAdvancedPredictions = (baseData: WeatherData, historical: WeatherData[]): WeatherData[] => {
-    const predictions: WeatherData[] = [];
-    
-    // Calculer les tendances basées sur les données historiques
-    const tempTrend = historical.length > 1 
-      ? (historical[historical.length - 1].temperature - historical[0].temperature) / historical.length
-      : 0;
-    
-    const precipTrend = historical.length > 1
-      ? historical.reduce((sum, data) => sum + data.precipitation, 0) / historical.length
-      : 0;
-    
-    for (let i = 1; i <= 5; i++) {
-      const prediction: WeatherData = {
-        temperature: baseData.temperature + (tempTrend * i) + (Math.random() - 0.5) * 4,
-        humidity: Math.max(0, Math.min(100, baseData.humidity + (Math.random() - 0.5) * 15)),
-        pressure: baseData.pressure + (Math.random() - 0.5) * 15,
-        windSpeed: Math.max(0, baseData.windSpeed + (Math.random() - 0.5) * 8),
-        windDirection: (baseData.windDirection + (Math.random() - 0.5) * 45) % 360,
-        precipitation: Math.max(0, precipTrend * 0.8 + (Math.random() - 0.5) * 3),
-        cloudCover: Math.max(0, Math.min(100, baseData.cloudCover + (Math.random() - 0.5) * 25)),
-        uvIndex: Math.max(0, Math.min(12, baseData.uvIndex + (Math.random() - 0.5) * 1.5)),
-        dewPoint: baseData.dewPoint + (Math.random() - 0.5) * 3,
-        date: new Date(Date.now() + i * 24 * 60 * 60 * 1000)
-      };
-      predictions.push(prediction);
-    }
-    
-    return predictions;
   };
 
   return (
