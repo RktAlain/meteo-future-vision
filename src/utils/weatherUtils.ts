@@ -2,16 +2,41 @@
 import { WeatherData, WeatherCondition } from '@/types/weather';
 
 export const getWeatherCondition = (data: WeatherData): WeatherCondition => {
-  // Logique de détermination des conditions météo basée sur les paramètres
+  // Conditions extrêmes en priorité
+  if (data.windSpeed > 118) { // Ouragan
+    return {
+      type: 'stormy',
+      description: 'Ouragan',
+      icon: 'cloud-lightning'
+    };
+  }
   
+  if (data.windSpeed > 88) { // Vents cycloniques
+    return {
+      type: 'stormy',
+      description: 'Cyclone',
+      icon: 'cloud-lightning'
+    };
+  }
+
+  if (data.precipitation > 50) { // Pluies torrentielles
+    return {
+      type: 'stormy',
+      description: 'Pluies torrentielles',
+      icon: 'cloud-lightning'
+    };
+  }
+
+  if (data.temperature < 0 && data.precipitation > 5) {
+    return {
+      type: 'snowy',
+      description: 'Neigeux',
+      icon: 'cloud-snow'
+    };
+  }
+
   if (data.precipitation > 10) {
-    if (data.temperature < 0) {
-      return {
-        type: 'snowy',
-        description: 'Neige',
-        icon: 'cloud-snow'
-      };
-    } else if (data.windSpeed > 30 && data.cloudCover > 80) {
+    if (data.windSpeed > 30 && data.cloudCover > 80) {
       return {
         type: 'stormy',
         description: 'Orageux',
@@ -25,23 +50,63 @@ export const getWeatherCondition = (data: WeatherData): WeatherCondition => {
       };
     }
   }
-  
-  if (data.cloudCover > 70) {
+
+  if (data.precipitation > 2) {
+    return {
+      type: 'rainy',
+      description: 'Bruine',
+      icon: 'cloud-rain'
+    };
+  }
+
+  // Brouillard
+  if (data.humidity > 95 && data.cloudCover > 90 && data.windSpeed < 10) {
+    return {
+      type: 'cloudy',
+      description: 'Brouillard',
+      icon: 'cloudy'
+    };
+  }
+
+  if (data.cloudCover > 80) {
+    return {
+      type: 'cloudy',
+      description: 'Couvert',
+      icon: 'cloudy'
+    };
+  }
+
+  if (data.cloudCover > 50) {
     return {
       type: 'cloudy',
       description: 'Nuageux',
       icon: 'cloudy'
     };
   }
-  
-  if (data.cloudCover < 30 && data.uvIndex > 3) {
+
+  if (data.cloudCover < 20 && data.uvIndex > 3) {
+    if (data.temperature > 30) {
+      return {
+        type: 'sunny',
+        description: 'Ensoleillé et chaud',
+        icon: 'cloud-sun'
+      };
+    }
     return {
       type: 'sunny',
       description: 'Ensoleillé',
       icon: 'cloud-sun'
     };
   }
-  
+
+  if (data.cloudCover < 50) {
+    return {
+      type: 'sunny',
+      description: 'Clair',
+      icon: 'cloud-sun'
+    };
+  }
+
   return {
     type: 'cloudy',
     description: 'Partiellement nuageux',

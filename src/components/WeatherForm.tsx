@@ -12,13 +12,13 @@ import { CloudRain, Thermometer, Wind, CloudDrizzle, RefreshCw } from 'lucide-re
 const weatherSchema = z.object({
   temperature: z.number().min(-50).max(60),
   humidity: z.number().min(0).max(100),
-  pressure: z.number().min(950).max(1050),
-  windSpeed: z.number().min(0).max(200),
+  pressure: z.number().min(800).max(1100), // Élargi la plage pour accepter plus de valeurs
+  windSpeed: z.number().min(0).max(300), // Augmenté pour les vents extrêmes
   windDirection: z.number().min(0).max(360),
-  precipitation: z.number().min(0).max(100),
+  precipitation: z.number().min(0).max(500), // Augmenté pour les précipitations extrêmes
   cloudCover: z.number().min(0).max(100),
-  uvIndex: z.number().min(0).max(12),
-  dewPoint: z.number().min(-50).max(40),
+  uvIndex: z.number().min(0).max(15), // Augmenté pour les indices UV extrêmes
+  dewPoint: z.number().min(-60).max(50), // Élargi la plage
 });
 
 interface WeatherFormProps {
@@ -136,6 +136,7 @@ export const WeatherForm: React.FC<WeatherFormProps> = ({ onSubmit, currentWeath
                     <FormControl>
                       <Input 
                         type="number" 
+                        step="0.1"
                         {...field} 
                         onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                         className="bg-white/50 border-gray-200"
@@ -158,6 +159,7 @@ export const WeatherForm: React.FC<WeatherFormProps> = ({ onSubmit, currentWeath
                     <FormControl>
                       <Input 
                         type="number" 
+                        step="0.1"
                         {...field} 
                         onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                         className="bg-white/50 border-gray-200"
@@ -282,3 +284,5 @@ export const WeatherForm: React.FC<WeatherFormProps> = ({ onSubmit, currentWeath
     </Card>
   );
 };
+
+export default WeatherForm;

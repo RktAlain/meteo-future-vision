@@ -6,6 +6,7 @@ import { WeatherPrediction } from '@/components/WeatherPrediction';
 import { WeatherHeader } from '@/components/WeatherHeader';
 import { WeatherChart } from '@/components/WeatherChart';
 import { RegionSelector } from '@/components/RegionSelector';
+import { WeatherVoiceNotification } from '@/components/WeatherVoiceNotification';
 import { WeatherData } from '@/types/weather';
 import { 
   fetchHistoricalWeather, 
@@ -69,7 +70,14 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-indigo-100">
       <div className="container mx-auto px-4 py-8">
-        <WeatherHeader />
+        <div className="flex items-center justify-between mb-8">
+          <WeatherHeader />
+          <WeatherVoiceNotification 
+            currentData={currentData}
+            predictions={predictions}
+            selectedRegion={selectedRegion?.name}
+          />
+        </div>
         
         {/* Indicateur de données */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
