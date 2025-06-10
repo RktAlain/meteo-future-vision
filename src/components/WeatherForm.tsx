@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -28,6 +28,8 @@ interface WeatherFormProps {
 }
 
 export const WeatherForm: React.FC<WeatherFormProps> = ({ onSubmit, currentWeatherData, isLoadingCurrent }) => {
+  const [useManualData, setUseManualData] = useState(false);
+  
   const form = useForm<WeatherData>({
     resolver: zodResolver(weatherSchema),
     defaultValues: {
@@ -43,9 +45,8 @@ export const WeatherForm: React.FC<WeatherFormProps> = ({ onSubmit, currentWeath
     },
   });
 
-  // Mettre à jour le formulaire avec les données actuelles
   useEffect(() => {
-    if (currentWeatherData) {
+    if (currentWeatherData && !useManualData) {
       form.reset({
         temperature: Math.round(currentWeatherData.temperature * 10) / 10,
         humidity: Math.round(currentWeatherData.humidity),
@@ -58,7 +59,7 @@ export const WeatherForm: React.FC<WeatherFormProps> = ({ onSubmit, currentWeath
         dewPoint: Math.round(currentWeatherData.dewPoint * 10) / 10,
       });
     }
-  }, [currentWeatherData, form]);
+  }, [currentWeatherData, form, useManualData]);
 
   return (
     <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-xl">
@@ -72,12 +73,28 @@ export const WeatherForm: React.FC<WeatherFormProps> = ({ onSubmit, currentWeath
             <RefreshCw className="h-4 w-4 animate-spin text-blue-500" />
           )}
         </CardTitle>
-        {currentWeatherData && (
-          <p className="text-sm text-green-600 font-medium">
-            ✓ Données actuelles chargées automatiquement
-          </p>
-        )}
+        
+        <div className="flex items-center justify-between">
+          {currentWeatherData && !useManualData && (
+            <p className="text-sm text-green-600 font-medium">
+              ✓ Données actuelles: {Math.round(currentWeatherData.temperature)}°C 
+              (Min: {currentWeatherData.temperatureMin ? Math.round(currentWeatherData.temperatureMin) : 'N/A'}°C, 
+              Max: {currentWeatherData.temperatureMax ? Math.round(currentWeatherData.temperatureMax) : 'N/A'}°C)
+            </p>
+          )}
+          
+          <Button
+            type="button"
+            variant={useManualData ? "default" : "outline"}
+            size="sm"
+            onClick={() => setUseManualData(!useManualData)}
+            className="ml-auto"
+          >
+            {useManualData ? "Utiliser données API" : "Éditer manuellement"}
+          </Button>
+        </div>
       </CardHeader>
+      
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -286,3 +303,5 @@ export const WeatherForm: React.FC<WeatherFormProps> = ({ onSubmit, currentWeath
 };
 
 export default WeatherForm;
+
+// ... keep existing code (imports)

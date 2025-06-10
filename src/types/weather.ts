@@ -1,6 +1,8 @@
 
 export interface WeatherData {
   temperature: number; // °C
+  temperatureMin?: number; // °C (pour les prédictions et données historiques)
+  temperatureMax?: number; // °C (pour les prédictions et données historiques)
   humidity: number; // %
   pressure: number; // hPa
   windSpeed: number; // km/h

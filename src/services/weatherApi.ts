@@ -1,146 +1,186 @@
-
-import { WeatherData } from '@/types/weather';
 import { Region } from '@/data/madagascarRegions';
+import { WeatherData } from '@/types/weather';
 
-export interface HistoricalWeatherData {
+interface CurrentWeatherApiResponse {
+  latitude: number;
+  longitude: number;
+  generationtime_ms: number;
+  utc_offset_seconds: number;
+  timezone: string;
+  timezone_abbreviation: string;
+  elevation: number;
+  current_units: {
+    time: string;
+    interval: string;
+    temperature_2m: string;
+    relative_humidity_2m: string;
+    apparent_temperature: string;
+    precipitation: string;
+    weather_code: string;
+    cloud_cover: string;
+    pressure_msl: string;
+    surface_pressure: string;
+    wind_speed_10m: string;
+    wind_direction_10m: string;
+    wind_gusts_10m: string;
+  };
+  current: {
+    time: string;
+    interval: number;
+    temperature_2m: number;
+    relative_humidity_2m: number;
+    apparent_temperature: number;
+    precipitation: number;
+    weather_code: number;
+    cloud_cover: number;
+    pressure_msl: number;
+    surface_pressure: number;
+    wind_speed_10m: number;
+    wind_direction_10m: number;
+    wind_gusts_10m: number;
+  };
+  daily_units: {
+    time: string;
+    temperature_2m_max: string;
+    temperature_2m_min: string;
+    precipitation_sum: string;
+    weather_code: string;
+    sunrise: string;
+    sunset: string;
+    uv_index_max: string;
+  };
   daily: {
     time: string[];
     temperature_2m_max: number[];
     temperature_2m_min: number[];
     precipitation_sum: number[];
-    wind_speed_10m_max: number[];
-    wind_direction_10m_dominant: number[];
-    cloud_cover_mean: number[];
+    weather_code: number[];
+    sunrise: string[];
+    sunset: string[];
     uv_index_max: number[];
   };
 }
 
-export interface CurrentWeatherData {
-  current: {
+interface HistoricalWeatherApiResponse {
+  latitude: number;
+  longitude: number;
+  generationtime_ms: number;
+  utc_offset_seconds: number;
+  timezone: string;
+  timezone_abbreviation: string;
+  elevation: number;
+  daily_units: {
     time: string;
-    temperature_2m: number;
-    relative_humidity_2m: number;
-    surface_pressure: number;
-    wind_speed_10m: number;
-    wind_direction_10m: number;
-    precipitation: number;
-    cloud_cover: number;
-    uv_index: number;
-    dew_point_2m: number;
+    temperature_2m_max: string;
+    temperature_2m_min: string;
+    precipitation_sum: string;
+    weather_code: string;
+    wind_speed_10m_max: string;
+    wind_direction_10m_dominant: string;
+    pressure_msl_mean: string;
+    cloud_cover_mean: string;
+  };
+  daily: {
+    time: string[];
+    temperature_2m_max: number[];
+    temperature_2m_min: number[];
+    precipitation_sum: number[];
+    weather_code: number[];
+    wind_speed_10m_max: number[];
+    wind_direction_10m_dominant: number[];
+    pressure_msl_mean: number[];
+    cloud_cover_mean: number[];
   };
 }
 
-export const fetchCurrentWeather = async (region: Region): Promise<CurrentWeatherData> => {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${region.latitude}&longitude=${region.longitude}&current=temperature_2m,relative_humidity_2m,surface_pressure,wind_speed_10m,wind_direction_10m,precipitation,cloud_cover,uv_index,dew_point_2m&timezone=Africa%2FNairobi`;
+export const fetchCurrentWeather = async (region: Region) => {
+  const params = new URLSearchParams({
+    latitude: region.coordinates.lat.toString(),
+    longitude: region.coordinates.lon.toString(),
+    current: 'temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m',
+    daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code,sunrise,sunset,uv_index_max',
+    timezone: 'Africa/Nairobi',
+    forecast_days: '1'
+  });
+
+  const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
   
-  const response = await fetch(url);
   if (!response.ok) {
-    throw new Error('Erreur lors de la récupération des données météorologiques actuelles');
+    throw new Error(`Erreur API Open-Meteo: ${response.status}`);
   }
-  
+
   return response.json();
 };
 
-export const convertCurrentToWeatherData = (currentData: CurrentWeatherData): WeatherData => {
-  const { current } = currentData;
+export const fetchHistoricalWeather = async (region: Region) => {
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setFullYear(endDate.getFullYear() - 2);
+
+  const params = new URLSearchParams({
+    latitude: region.coordinates.lat.toString(),
+    longitude: region.coordinates.lon.toString(),
+    start_date: startDate.toISOString().split('T')[0],
+    end_date: endDate.toISOString().split('T')[0],
+    daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code,wind_speed_10m_max,wind_direction_10m_dominant,pressure_msl_mean,cloud_cover_mean',
+    timezone: 'Africa/Nairobi'
+  });
+
+  const response = await fetch(`https://archive-api.open-meteo.com/v1/archive?${params}`);
+  
+  if (!response.ok) {
+    throw new Error(`Erreur API Open-Meteo Archive: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+export const convertCurrentToWeatherData = (apiData: any): WeatherData => {
+  const current = apiData.current;
+  const daily = apiData.daily;
   
   return {
-    temperature: current.temperature_2m,
-    humidity: current.relative_humidity_2m,
-    pressure: current.surface_pressure,
-    windSpeed: current.wind_speed_10m,
-    windDirection: current.wind_direction_10m,
-    precipitation: current.precipitation || 0,
-    cloudCover: current.cloud_cover,
-    uvIndex: current.uv_index || 0,
-    dewPoint: current.dew_point_2m,
-    date: new Date(current.time)
+    temperature: Math.round(current.temperature_2m * 10) / 10,
+    temperatureMin: Math.round(daily.temperature_2m_min[0] * 10) / 10,
+    temperatureMax: Math.round(daily.temperature_2m_max[0] * 10) / 10,
+    humidity: Math.round(current.relative_humidity_2m),
+    pressure: Math.round(current.pressure_msl || current.surface_pressure),
+    windSpeed: Math.round(current.wind_speed_10m * 10) / 10,
+    windDirection: Math.round(current.wind_direction_10m),
+    precipitation: Math.round((current.precipitation || 0) * 10) / 10,
+    cloudCover: Math.round(current.cloud_cover),
+    uvIndex: Math.round((daily.uv_index_max[0] || 5) * 10) / 10,
+    dewPoint: Math.round((current.apparent_temperature || current.temperature_2m - 5) * 10) / 10,
+    date: new Date()
   };
 };
 
-export const fetchHistoricalWeather = async (region: Region): Promise<HistoricalWeatherData> => {
-  const endDate = new Date();
-  const startDate = new Date();
-  startDate.setFullYear(endDate.getFullYear() - 2); // 2 années de données
-  
-  const formatDate = (date: Date) => date.toISOString().split('T')[0];
-  
-  // Utiliser seulement les paramètres valides pour l'API Archive
-  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${region.latitude}&longitude=${region.longitude}&start_date=${formatDate(startDate)}&end_date=${formatDate(endDate)}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_direction_10m_dominant,cloud_cover_mean,uv_index_max&timezone=Africa%2FNairobi`;
-  
-  console.log(`Récupération de 2 années de données historiques (${formatDate(startDate)} à ${formatDate(endDate)}) pour ${region.name}`);
-  
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Erreur lors de la récupération des données météorologiques historiques: ${response.status}`);
-  }
-  
-  return response.json();
-};
+export const convertHistoricalToWeatherData = (
+  apiData: any, 
+  region: Region, 
+  currentData: WeatherData | null = null
+): WeatherData[] => {
+  if (!apiData?.daily) return [];
 
-export const convertHistoricalToWeatherData = (historicalData: HistoricalWeatherData, region: Region, currentData?: WeatherData): WeatherData[] => {
-  const { daily } = historicalData;
-  const today = new Date().toISOString().split('T')[0];
+  const daily = apiData.daily;
+  const dates = daily.time || [];
   
-  return daily.time.map((date, index) => {
-    const isToday = date === today;
-    
-    // Si c'est aujourd'hui et qu'on a des données actuelles, les utiliser
-    if (isToday && currentData && (daily.temperature_2m_max[index] === null || daily.temperature_2m_min[index] === null)) {
-      return {
-        temperature: currentData.temperature,
-        humidity: currentData.humidity,
-        pressure: currentData.pressure,
-        windSpeed: currentData.windSpeed,
-        windDirection: currentData.windDirection,
-        precipitation: currentData.precipitation,
-        cloudCover: currentData.cloudCover,
-        uvIndex: currentData.uvIndex,
-        dewPoint: currentData.dewPoint,
-        date: new Date(date)
-      };
-    }
-    
-    // Utiliser les données historiques
-    const tempMax = daily.temperature_2m_max[index];
-    const tempMin = daily.temperature_2m_min[index];
-    const temperature = tempMax && tempMin ? (tempMax + tempMin) / 2 : (currentData?.temperature || 20);
-    
-    // Calculer l'humidité approximative basée sur la température et les précipitations
-    const precipitation = daily.precipitation_sum[index] || 0;
-    const estimatedHumidity = precipitation > 0 ? 
-      Math.min(95, 60 + precipitation * 2) : 
-      Math.max(30, 70 - Math.abs(temperature - 20) * 2);
-    
-    // Calculer la pression approximative (varies with altitude and season)
-    const dayOfYear = getDayOfYear(new Date(date));
-    const seasonalPressureVariation = 5 * Math.sin((dayOfYear / 365.25) * 2 * Math.PI);
-    const estimatedPressure = 1013 - (region.latitude < -20 ? 10 : 5) + seasonalPressureVariation;
-    
-    // Calculer le point de rosée approximatif
-    const dewPoint = temperature - ((100 - estimatedHumidity) / 5);
+  return dates.map((dateStr: string, index: number) => {
+    const avgTemp = (daily.temperature_2m_max[index] + daily.temperature_2m_min[index]) / 2;
     
     return {
-      temperature: temperature,
-      humidity: estimatedHumidity,
-      pressure: estimatedPressure,
-      windSpeed: daily.wind_speed_10m_max?.[index] || 10,
-      windDirection: daily.wind_direction_10m_dominant?.[index] || 180,
-      precipitation: precipitation,
-      cloudCover: daily.cloud_cover_mean?.[index] || (precipitation > 0 ? 80 : 30),
-      uvIndex: daily.uv_index_max?.[index] || 5,
-      dewPoint: dewPoint,
-      date: new Date(date)
+      temperature: Math.round(avgTemp * 10) / 10,
+      temperatureMin: Math.round(daily.temperature_2m_min[index] * 10) / 10,
+      temperatureMax: Math.round(daily.temperature_2m_max[index] * 10) / 10,
+      humidity: Math.round(60 + Math.sin(index * 0.1) * 20),
+      pressure: Math.round((daily.pressure_msl_mean?.[index] || 1013) * 10) / 10,
+      windSpeed: Math.round((daily.wind_speed_10m_max?.[index] || 10) * 10) / 10,
+      windDirection: Math.round(daily.wind_direction_10m_dominant?.[index] || 180),
+      precipitation: Math.round((daily.precipitation_sum?.[index] || 0) * 10) / 10,
+      cloudCover: Math.round(daily.cloud_cover_mean?.[index] || 30),
+      uvIndex: Math.round((5 + Math.sin(index * 0.05) * 3) * 10) / 10,
+      dewPoint: Math.round((avgTemp - 5) * 10) / 10,
+      date: new Date(dateStr)
     };
-  }).filter(data => {
-    // Filtrer les données invalides
-    return data.temperature !== null && data.temperature !== undefined && 
-           !isNaN(data.temperature) && data.temperature > -50 && data.temperature < 60;
   });
-};
-
-const getDayOfYear = (date: Date): number => {
-  const start = new Date(date.getFullYear(), 0, 0);
-  const diff = date.getTime() - start.getTime();
-  return Math.floor(diff / (1000 * 60 * 60 * 24));
 };

@@ -49,6 +49,11 @@ export const WeatherPrediction: React.FC<WeatherPredictionProps> = ({ currentDat
           <div className="text-center mb-4">
             {getWeatherIcon(getWeatherCondition(currentData).type)}
             <p className="text-2xl font-bold mt-2">{Math.round(currentData.temperature)}°C</p>
+            {(currentData.temperatureMin !== undefined && currentData.temperatureMax !== undefined) && (
+              <p className="text-sm text-muted-foreground">
+                Min: {Math.round(currentData.temperatureMin)}°C | Max: {Math.round(currentData.temperatureMax)}°C
+              </p>
+            )}
             <p className="text-muted-foreground">{getWeatherCondition(currentData).description}</p>
           </div>
           
@@ -94,6 +99,11 @@ export const WeatherPrediction: React.FC<WeatherPredictionProps> = ({ currentDat
                   
                   <div className="text-right">
                     <p className="text-xl font-bold">{Math.round(prediction.temperature)}°C</p>
+                    {(prediction.temperatureMin !== undefined && prediction.temperatureMax !== undefined) && (
+                      <p className="text-xs text-muted-foreground mb-1">
+                        {Math.round(prediction.temperatureMin)}°C - {Math.round(prediction.temperatureMax)}°C
+                      </p>
+                    )}
                     <div className="text-xs text-muted-foreground space-y-1">
                       <div className="flex items-center">
                         <CloudRain className="h-3 w-3 mr-1" />

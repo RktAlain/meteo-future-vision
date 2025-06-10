@@ -82,7 +82,8 @@ export const HistoricalDataTable: React.FC<HistoricalDataTableProps> = ({
             <TableHeader>
               <TableRow className="bg-gradient-to-r from-blue-50 to-indigo-50">
                 <TableHead className="font-semibold">Date</TableHead>
-                <TableHead className="font-semibold">Temp (°C)</TableHead>
+                <TableHead className="font-semibold">Temp Moy (°C)</TableHead>
+                <TableHead className="font-semibold">Min/Max (°C)</TableHead>
                 <TableHead className="font-semibold">Humidité (%)</TableHead>
                 <TableHead className="font-semibold">Pression (hPa)</TableHead>
                 <TableHead className="font-semibold">Vent (km/h)</TableHead>
@@ -105,6 +106,13 @@ export const HistoricalDataTable: React.FC<HistoricalDataTableProps> = ({
                     }`}>
                       {data.temperature.toFixed(1)}
                     </span>
+                  </TableCell>
+                  <TableCell className="text-xs">
+                    {(data.temperatureMin !== undefined && data.temperatureMax !== undefined) ? (
+                      <span className="text-gray-600">
+                        {data.temperatureMin.toFixed(1)} / {data.temperatureMax.toFixed(1)}
+                      </span>
+                    ) : 'N/A'}
                   </TableCell>
                   <TableCell>{data.humidity}%</TableCell>
                   <TableCell>{data.pressure.toFixed(1)}</TableCell>

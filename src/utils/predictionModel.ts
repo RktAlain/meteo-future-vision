@@ -1,4 +1,3 @@
-
 import { WeatherData } from '@/types/weather';
 
 export interface WeatherTrends {
@@ -124,28 +123,23 @@ export const generatePredictions = (
 ): WeatherData[] => {
   const predictions: WeatherData[] = [];
   
-  console.log(`Génération de ${days} jours de prédictions avec variations réalistes`);
+  console.log(`Génération de ${days} jours de prédictions avec variations réalistes et min/max`);
   
-  // Obtenir les données des 30 derniers jours pour la tendance récente
   const recentData = historicalData.slice(-30);
   
   for (let i = 1; i <= days; i++) {
     const futureDate = new Date(Date.now() + i * 24 * 60 * 60 * 1000);
     const dayOfYear = getDayOfYear(futureDate);
     
-    // Facteur d'amortissement pour les tendances
     const trendDamping = Math.exp(-i * 0.05);
     
-    // Variation saisonnière
     const seasonalAngle = (2 * Math.PI * dayOfYear) / 365.25;
     const seasonalVariation = trends.seasonalTemperatureAmplitude * Math.sin(seasonalAngle + trends.seasonalPhase);
     
-    // Variation aléatoire réaliste basée sur l'écart type historique
     const tempVariation = (Math.random() - 0.5) * trends.dailyVariations.tempStdDev * 0.8;
     const humidityVariation = (Math.random() - 0.5) * trends.dailyVariations.humidityStdDev * 0.6;
     const windVariation = (Math.random() - 0.5) * trends.dailyVariations.windStdDev * 0.7;
     
-    // Prédiction de température avec variations réalistes
     const recentTempAvg = recentData.length > 0 ? 
       recentData.reduce((sum, d) => sum + d.temperature, 0) / recentData.length : 
       currentData.temperature;
@@ -154,55 +148,54 @@ export const generatePredictions = (
       (trends.temperatureTrend * i * trendDamping) + 
       seasonalVariation * 0.3 +
       tempVariation +
-      (Math.sin(i * 0.5) * 2); // Variation cyclique
+      (Math.sin(i * 0.5) * 2);
     
-    // Prédiction d'humidité avec corrélation inverse à la température
+    // Calculer les températures min/max
+    const dailyTempRange = 8 + Math.random() * 6; // Variation journalière de 8-14°C
+    const predictedTempMin = predictedTemp - dailyTempRange * 0.4;
+    const predictedTempMax = predictedTemp + dailyTempRange * 0.6;
+    
     const tempChange = predictedTemp - currentData.temperature;
     const predictedHumidity = Math.max(10, Math.min(95, 
       currentData.humidity - (tempChange * 1.5) + humidityVariation + (trends.humidityTrend * i * trendDamping)
     ));
     
-    // Prédiction de pression avec variations météorologiques
     const pressureVariation = (Math.random() - 0.5) * 8;
     const predictedPressure = currentData.pressure + 
       (trends.pressureTrend * i * trendDamping) + 
       pressureVariation +
       (5 * Math.sin(seasonalAngle));
     
-    // Prédiction de vitesse du vent avec variations
     const predictedWindSpeed = Math.max(0, 
       currentData.windSpeed + (trends.windSpeedTrend * i * trendDamping) + windVariation
     );
     
-    // Prédiction des précipitations basée sur les patterns et l'humidité
     const rainProbability = Math.random();
     const humidityFactor = predictedHumidity > 80 ? 3 : predictedHumidity > 60 ? 1.5 : 0.5;
     const predictedPrecipitation = rainProbability < (trends.dailyVariations.precipitationProb * humidityFactor) ? 
       Math.random() * trends.precipitationPattern * 2 : 0;
     
-    // Prédiction de couverture nuageuse corrélée aux précipitations et humidité
     const precipitationCloudFactor = predictedPrecipitation > 0 ? 40 + Math.random() * 30 : 0;
     const humidityCloudFactor = (predictedHumidity - 50) * 0.6;
     const predictedCloudCover = Math.max(0, Math.min(100, 
       trends.cloudCoverPattern + precipitationCloudFactor + humidityCloudFactor + (Math.random() - 0.5) * 20
     ));
     
-    // Prédiction de l'index UV
     const cloudUVReduction = (predictedCloudCover / 100) * 0.7;
     const seasonalUVFactor = 0.7 + 0.3 * Math.sin(seasonalAngle);
     const predictedUV = Math.max(0, Math.min(12, 
       (8 * seasonalUVFactor * (1 - cloudUVReduction)) + (Math.random() - 0.5) * 2
     ));
     
-    // Point de rosée
     const predictedDewPoint = predictedTemp - ((100 - predictedHumidity) / 5);
     
-    // Direction du vent avec variations réalistes
     const windDirectionChange = (Math.random() - 0.5) * 45 * i * 0.3;
     const predictedWindDirection = (currentData.windDirection + windDirectionChange + 360) % 360;
     
     predictions.push({
       temperature: Math.round(predictedTemp * 10) / 10,
+      temperatureMin: Math.round(predictedTempMin * 10) / 10,
+      temperatureMax: Math.round(predictedTempMax * 10) / 10,
       humidity: Math.round(predictedHumidity),
       pressure: Math.round(predictedPressure * 10) / 10,
       windSpeed: Math.round(predictedWindSpeed * 10) / 10,

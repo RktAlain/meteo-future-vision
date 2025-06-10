@@ -1,11 +1,9 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, TrendingUp, Calculator, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Brain, Database, TrendingUp, CloudRain, Thermometer, Wind, Sun } from 'lucide-react';
 
 const ModelExplanation = () => {
   const navigate = useNavigate();
@@ -13,262 +11,187 @@ const ModelExplanation = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-sky-50 to-indigo-100">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button 
-            variant="outline" 
-            size="sm" 
+        <div className="flex items-center mb-8">
+          <Button
+            variant="outline"
             onClick={() => navigate('/')}
-            className="flex items-center gap-2"
+            className="mr-4"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Modèle de Prédiction Météorologique</h1>
-            <p className="text-gray-600 mt-2">Explication détaillée des algorithmes et calculs utilisés</p>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-800">
+            Fonctionnement du Modèle de Prédiction Météorologique
+          </h1>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-6">
           {/* Vue d'ensemble */}
           <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-xl">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-blue-600" />
-                Vue d'ensemble du modèle
+              <CardTitle className="flex items-center text-xl">
+                <Brain className="h-6 w-6 mr-2 text-purple-600" />
+                Vue d'ensemble du Modèle
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                Notre système de prédiction météorologique utilise une approche basée sur l'analyse des tendances historiques 
-                et des corrélations physiques entre les variables météorologiques pour générer des prédictions précises sur 5 jours.
+              <p className="text-gray-700 leading-relaxed">
+                Notre modèle de prédiction météorologique utilise une approche hybride combinant :
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <h4 className="font-semibold text-blue-800">Analyse des tendances</h4>
-                  <p className="text-sm text-blue-600">Régression linéaire sur données historiques</p>
-                </div>
-                <div className="p-4 bg-green-50 rounded-lg">
-                  <h4 className="font-semibold text-green-800">Corrélations physiques</h4>
-                  <p className="text-sm text-green-600">Relations entre variables météorologiques</p>
-                </div>
-                <div className="p-4 bg-purple-50 rounded-lg">
-                  <h4 className="font-semibold text-purple-800">Variations saisonnières</h4>
-                  <p className="text-sm text-purple-600">Patterns cycliques et amortissement</p>
-                </div>
-              </div>
+              <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                <li><strong>Données historiques :</strong> 2 années complètes de données météorologiques via l'API Open-Meteo Archive</li>
+                <li><strong>Données en temps réel :</strong> Conditions météorologiques actuelles avec températures min/max du jour</li>
+                <li><strong>Analyse des tendances :</strong> Détection de patterns saisonniers et variations climatiques</li>
+                <li><strong>Prédictions dynamiques :</strong> Génération de prévisions sur 7 jours avec intervalles de température</li>
+                <li><strong>Édition manuelle :</strong> Possibilité de modifier les données d'entrée pour des scénarios personnalisés</li>
+              </ul>
             </CardContent>
           </Card>
 
-          {/* Étape 1: Analyse des tendances */}
-          <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-xl">
+          {/* Sources de données */}
+          <Card className="backdrop-blur-sm bg-gradient-to-r from-green-50/80 to-blue-50/80 border-0 shadow-xl">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-green-600" />
-                Étape 1: Analyse des tendances historiques
+              <CardTitle className="flex items-center text-xl">
+                <Database className="h-6 w-6 mr-2 text-green-600" />
+                Sources de Données
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Badge variant="outline" className="mb-4">Fonction: analyzeTrends()</Badge>
-              
-              <h4 className="font-semibold">Calcul de régression linéaire :</h4>
-              <div className="bg-gray-50 p-4 rounded-lg font-mono text-sm">
-                <p><strong>Formule de tendance :</strong></p>
-                <p>tendance = (n × ΣXY - ΣX × ΣY) / (n × ΣX² - (ΣX)²)</p>
-                <br />
-                <p><strong>Où :</strong></p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>n = nombre de jours historiques</li>
-                  <li>X = index du jour (0, 1, 2, ...)</li>
-                  <li>Y = valeur météorologique (température, humidité, etc.)</li>
-                </ul>
-              </div>
-              
-              <h4 className="font-semibold mt-6">Variables analysées :</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <Badge variant="secondary">Température</Badge>
-                <Badge variant="secondary">Humidité</Badge>
-                <Badge variant="secondary">Pression</Badge>
-                <Badge variant="secondary">Vitesse du vent</Badge>
-                <Badge variant="secondary">Précipitations</Badge>
-                <Badge variant="secondary">Couverture nuageuse</Badge>
-                <Badge variant="secondary">Index UV</Badge>
-                <Badge variant="secondary">Point de rosée</Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Étape 2: Génération des prédictions */}
-          <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calculator className="h-5 w-5 text-orange-600" />
-                Étape 2: Génération des prédictions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <Badge variant="outline" className="mb-4">Fonction: generatePredictions()</Badge>
-
-              <div className="space-y-4">
-                <h4 className="font-semibold">Formules de prédiction par variable :</h4>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <h5 className="font-medium text-blue-800">Température</h5>
-                    <p className="text-sm text-blue-600 mt-1 font-mono">
-                      T(j) = T_actuelle + (tendance_T × j × e^(-j×0.2)) + variation_saisonnière
-                    </p>
-                  </div>
-                  
-                  <div className="p-4 bg-green-50 rounded-lg">
-                    <h5 className="font-medium text-green-800">Humidité</h5>
-                    <p className="text-sm text-green-600 mt-1 font-mono">
-                      H(j) = H_actuelle + (tendance_H × j × e^(-j×0.2)) + corrélation_temp
-                    </p>
-                  </div>
-                  
-                  <div className="p-4 bg-purple-50 rounded-lg">
-                    <h5 className="font-medium text-purple-800">Précipitations</h5>
-                    <p className="text-sm text-purple-600 mt-1 font-mono">
-                      P(j) = pattern_P × facteur_humidité × aléatoire
-                    </p>
-                  </div>
-                  
-                  <div className="p-4 bg-orange-50 rounded-lg">
-                    <h5 className="font-medium text-orange-800">Index UV</h5>
-                    <p className="text-sm text-orange-600 mt-1 font-mono">
-                      UV(j) = UV_actuel + tendance_UV - réduction_nuages
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-yellow-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-yellow-800 mb-2">Corrélations physiques intégrées :</h4>
-                <ul className="text-sm text-yellow-700 space-y-1">
-                  <li>• <strong>Température-Humidité :</strong> Température plus basse → humidité plus élevée</li>
-                  <li>• <strong>Humidité-Précipitations :</strong> Humidité {">"} 80% → facteur précipitations ×1.5</li>
-                  <li>• <strong>Précipitations-Nuages :</strong> Plus de précipitations → plus de couverture nuageuse</li>
-                  <li>• <strong>Nuages-UV :</strong> Plus de nuages → réduction de l'index UV</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Étape 3: Amortissement et variations */}
-          <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-indigo-600" />
-                Étape 3: Amortissement et variations saisonnières
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-indigo-700">Facteur d'amortissement</h4>
-                  <div className="bg-indigo-50 p-4 rounded-lg">
-                    <p className="text-sm text-indigo-600 font-mono mb-2">
-                      amortissement = e^(-jour × 0.2)
-                    </p>
-                    <p className="text-sm text-indigo-600">
-                      Les tendances perdent en intensité au fil des jours pour éviter 
-                      les prédictions extrêmes à long terme.
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-purple-700">Variation saisonnière</h4>
-                  <div className="bg-purple-50 p-4 rounded-lg">
-                    <p className="text-sm text-purple-600 font-mono mb-2">
-                      variation = sin(temps / année × 2π) × 2
-                    </p>
-                    <p className="text-sm text-purple-600">
-                      Intègre les cycles saisonniers naturels pour des prédictions 
-                      plus réalistes selon la période de l'année.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Limitations et améliorations */}
-          <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-xl">
-            <CardHeader>
-              <CardTitle>Limitations et améliorations futures</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-semibold text-red-700 mb-2">Limitations actuelles</h4>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-500">•</span>
-                      <span>Modèle linéaire simple (pas de machine learning complexe)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-500">•</span>
-                      <span>Dépendance aux données historiques locales</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-500">•</span>
-                      <span>Pas de prise en compte des phénomènes météo extrêmes</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-500">•</span>
-                      <span>Prédictions sur 5 jours maximum</span>
-                    </li>
+                  <h3 className="font-semibold text-lg mb-2">API Open-Meteo Archive</h3>
+                  <ul className="list-disc pl-4 space-y-1 text-sm text-gray-600">
+                    <li>Données historiques sur 2 ans (2023-2024)</li>
+                    <li>Températures min/max quotidiennes</li>
+                    <li>Précipitations, pression, vent</li>
+                    <li>Couverture nuageuse et conditions météo</li>
                   </ul>
                 </div>
-                
                 <div>
-                  <h4 className="font-semibold text-green-700 mb-2">Améliorations futures</h4>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500">•</span>
-                      <span>Intégration de modèles de machine learning (LSTM, Random Forest)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500">•</span>
-                      <span>Prise en compte des données satellite</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500">•</span>
-                      <span>Prédictions probabilistes avec intervalles de confiance</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500">•</span>
-                      <span>Extension à 10-15 jours de prédiction</span>
-                    </li>
+                  <h3 className="font-semibold text-lg mb-2">API Open-Meteo Current</h3>
+                  <ul className="list-disc pl-4 space-y-1 text-sm text-gray-600">
+                    <li>Température actuelle et apparente</li>
+                    <li>Min/Max du jour en cours</li>
+                    <li>Humidité, pression, vent en temps réel</li>
+                    <li>Index UV et conditions actuelles</li>
                   </ul>
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <Separator className="my-4" />
-              
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-blue-800 mb-2">Précision actuelle du modèle</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div>
-                    <p className="font-medium">Température</p>
-                    <p className="text-gray-600">±2°C sur 5 jours</p>
-                  </div>
-                  <div>
-                    <p className="font-medium">Humidité</p>
-                    <p className="text-gray-600">±10% sur 5 jours</p>
-                  </div>
-                  <div>
-                    <p className="font-medium">Précipitations</p>
-                    <p className="text-gray-600">Tendance générale</p>
-                  </div>
-                  <div>
-                    <p className="font-medium">Vent</p>
-                    <p className="text-gray-600">±5 km/h sur 5 jours</p>
-                  </div>
+          {/* Algorithme de prédiction */}
+          <Card className="backdrop-blur-sm bg-gradient-to-r from-purple-50/80 to-pink-50/80 border-0 shadow-xl">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl">
+                <TrendingUp className="h-6 w-6 mr-2 text-purple-600" />
+                Algorithme de Prédiction
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="bg-white/50 p-4 rounded-lg">
+                  <h4 className="font-semibold mb-2">1. Analyse des Tendances</h4>
+                  <p className="text-sm text-gray-600">
+                    Calcul des tendances linéaires sur les paramètres météorologiques
+                    et détection des patterns saisonniers.
+                  </p>
                 </div>
+                <div className="bg-white/50 p-4 rounded-lg">
+                  <h4 className="font-semibold mb-2">2. Variations Réalistes</h4>
+                  <p className="text-sm text-gray-600">
+                    Application d'écarts-types historiques et de corrélations
+                    entre les paramètres météorologiques.
+                  </p>
+                </div>
+                <div className="bg-white/50 p-4 rounded-lg">
+                  <h4 className="font-semibold mb-2">3. Prédictions Dynamiques</h4>
+                  <p className="text-sm text-gray-600">
+                    Génération de prévisions avec amortissement des tendances
+                    et variations cycliques.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Paramètres prédits */}
+          <Card className="backdrop-blur-sm bg-gradient-to-r from-orange-50/80 to-red-50/80 border-0 shadow-xl">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl">
+                <Thermometer className="h-6 w-6 mr-2 text-orange-600" />
+                Paramètres Prédits
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-white/50 rounded-lg">
+                  <Thermometer className="h-8 w-8 mx-auto mb-2 text-red-500" />
+                  <h4 className="font-semibold">Température</h4>
+                  <p className="text-sm text-gray-600">Moyenne, Min, Max quotidiens</p>
+                </div>
+                <div className="text-center p-4 bg-white/50 rounded-lg">
+                  <CloudRain className="h-8 w-8 mx-auto mb-2 text-blue-500" />
+                  <h4 className="font-semibold">Précipitations</h4>
+                  <p className="text-sm text-gray-600">Quantité et probabilité</p>
+                </div>
+                <div className="text-center p-4 bg-white/50 rounded-lg">
+                  <Wind className="h-8 w-8 mx-auto mb-2 text-gray-500" />
+                  <h4 className="font-semibold">Vent</h4>
+                  <p className="text-sm text-gray-600">Vitesse et direction</p>
+                </div>
+                <div className="text-center p-4 bg-white/50 rounded-lg">
+                  <Sun className="h-8 w-8 mx-auto mb-2 text-yellow-500" />
+                  <h4 className="font-semibold">Autres</h4>
+                  <p className="text-sm text-gray-600">UV, humidité, pression</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Fonctionnalités */}
+          <Card className="backdrop-blur-sm bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border-0 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-xl">Fonctionnalités Avancées</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">📊 Visualisation Interactive</h3>
+                  <ul className="list-disc pl-4 space-y-1 text-sm text-gray-600">
+                    <li>Graphiques temporels sur 2 semaines</li>
+                    <li>Comparaison données historiques/prédictions</li>
+                    <li>Tableaux détaillés avec pagination</li>
+                    <li>Affichage des intervalles de température</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">⚙️ Contrôle Utilisateur</h3>
+                  <ul className="list-disc pl-4 space-y-1 text-sm text-gray-600">
+                    <li>Sélection de toutes les régions de Madagascar</li>
+                    <li>Édition manuelle des paramètres d'entrée</li>
+                    <li>Basculement entre données API et manuelles</li>
+                    <li>Notifications vocales des prédictions</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Précision du modèle */}
+          <Card className="backdrop-blur-sm bg-gradient-to-r from-yellow-50/80 to-orange-50/80 border-0 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-xl">Précision et Limitations</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                <h4 className="font-semibold text-yellow-800">📋 Points Importants</h4>
+                <ul className="list-disc pl-4 mt-2 space-y-1 text-sm text-yellow-700">
+                  <li>Les prédictions sont plus précises à court terme (1-3 jours)</li>
+                  <li>Le modèle s'adapte aux conditions climatiques locales de Madagascar</li>
+                  <li>Les données historiques permettent une meilleure compréhension des patterns saisonniers</li>
+                  <li>L'édition manuelle permet de tester des scénarios hypothétiques</li>
+                </ul>
               </div>
             </CardContent>
           </Card>
