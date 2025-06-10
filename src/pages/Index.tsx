@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -45,8 +44,8 @@ const Index = () => {
     ? convertCurrentToWeatherData(currentWeatherData)
     : null;
 
-  const historicalData = historicalWeatherData 
-    ? convertHistoricalToWeatherData(historicalWeatherData, currentData)
+  const historicalData = historicalWeatherData && selectedRegion
+    ? convertHistoricalToWeatherData(historicalWeatherData, selectedRegion, currentData)
     : [];
 
   const handleWeatherSubmit = (data: WeatherData) => {

@@ -78,7 +78,7 @@ export const fetchHistoricalWeather = async (region: Region): Promise<Historical
   return response.json();
 };
 
-export const convertHistoricalToWeatherData = (historicalData: HistoricalWeatherData, currentData?: WeatherData): WeatherData[] => {
+export const convertHistoricalToWeatherData = (historicalData: HistoricalWeatherData, region: Region, currentData?: WeatherData): WeatherData[] => {
   const { daily } = historicalData;
   const today = new Date().toISOString().split('T')[0];
   
