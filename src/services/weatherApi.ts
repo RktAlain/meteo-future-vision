@@ -8,8 +8,6 @@ export interface HistoricalWeatherData {
     temperature_2m_max: number[];
     temperature_2m_min: number[];
     precipitation_sum: number[];
-    relative_humidity_2m: number[];
-    surface_pressure: number[];
     wind_speed_10m_max: number[];
     wind_direction_10m_dominant: number[];
     cloud_cover_mean: number[];
@@ -63,18 +61,18 @@ export const convertCurrentToWeatherData = (currentData: CurrentWeatherData): We
 export const fetchHistoricalWeather = async (region: Region): Promise<HistoricalWeatherData> => {
   const endDate = new Date();
   const startDate = new Date();
-  startDate.setFullYear(endDate.getFullYear() - 3); // 3 années de données
+  startDate.setFullYear(endDate.getFullYear() - 2); // 2 années de données
   
   const formatDate = (date: Date) => date.toISOString().split('T')[0];
   
-  // Récupérer plus de paramètres météorologiques pour une meilleure prédiction
-  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${region.latitude}&longitude=${region.longitude}&start_date=${formatDate(startDate)}&end_date=${formatDate(endDate)}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,relative_humidity_2m,surface_pressure,wind_speed_10m_max,wind_direction_10m_dominant,cloud_cover_mean,uv_index_max&timezone=Africa%2FNairobi`;
+  // Utiliser seulement les paramètres valides pour l'API Archive
+  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${region.latitude}&longitude=${region.longitude}&start_date=${formatDate(startDate)}&end_date=${formatDate(endDate)}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_direction_10m_dominant,cloud_cover_mean,uv_index_max&timezone=Africa%2FNairobi`;
   
-  console.log(`Récupération de 3 années de données historiques (${formatDate(startDate)} à ${formatDate(endDate)})`);
+  console.log(`Récupération de 2 années de données historiques (${formatDate(startDate)} à ${formatDate(endDate)}) pour ${region.name}`);
   
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error('Erreur lors de la récupération des données météorologiques historiques');
+    throw new Error(`Erreur lors de la récupération des données météorologiques historiques: ${response.status}`);
   }
   
   return response.json();
@@ -103,23 +101,33 @@ export const convertHistoricalToWeatherData = (historicalData: HistoricalWeather
       };
     }
     
-    // Utiliser les données historiques avec toutes les variables disponibles
+    // Utiliser les données historiques
     const tempMax = daily.temperature_2m_max[index];
     const tempMin = daily.temperature_2m_min[index];
     const temperature = tempMax && tempMin ? (tempMax + tempMin) / 2 : (currentData?.temperature || 20);
     
+    // Calculer l'humidité approximative basée sur la température et les précipitations
+    const precipitation = daily.precipitation_sum[index] || 0;
+    const estimatedHumidity = precipitation > 0 ? 
+      Math.min(95, 60 + precipitation * 2) : 
+      Math.max(30, 70 - Math.abs(temperature - 20) * 2);
+    
+    // Calculer la pression approximative (varies with altitude and season)
+    const dayOfYear = getDayOfYear(new Date(date));
+    const seasonalPressureVariation = 5 * Math.sin((dayOfYear / 365.25) * 2 * Math.PI);
+    const estimatedPressure = 1013 - (region.latitude < -20 ? 10 : 5) + seasonalPressureVariation;
+    
     // Calculer le point de rosée approximatif
-    const humidity = daily.relative_humidity_2m?.[index] || 60;
-    const dewPoint = temperature - ((100 - humidity) / 5);
+    const dewPoint = temperature - ((100 - estimatedHumidity) / 5);
     
     return {
       temperature: temperature,
-      humidity: humidity,
-      pressure: daily.surface_pressure?.[index] || 1013,
+      humidity: estimatedHumidity,
+      pressure: estimatedPressure,
       windSpeed: daily.wind_speed_10m_max?.[index] || 10,
       windDirection: daily.wind_direction_10m_dominant?.[index] || 180,
-      precipitation: daily.precipitation_sum[index] || 0,
-      cloudCover: daily.cloud_cover_mean?.[index] || (daily.precipitation_sum[index] > 0 ? 80 : 30),
+      precipitation: precipitation,
+      cloudCover: daily.cloud_cover_mean?.[index] || (precipitation > 0 ? 80 : 30),
       uvIndex: daily.uv_index_max?.[index] || 5,
       dewPoint: dewPoint,
       date: new Date(date)
@@ -129,4 +137,10 @@ export const convertHistoricalToWeatherData = (historicalData: HistoricalWeather
     return data.temperature !== null && data.temperature !== undefined && 
            !isNaN(data.temperature) && data.temperature > -50 && data.temperature < 60;
   });
+};
+
+const getDayOfYear = (date: Date): number => {
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date.getTime() - start.getTime();
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
 };
