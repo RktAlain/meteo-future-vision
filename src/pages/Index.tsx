@@ -19,6 +19,7 @@ import { madagascarRegions, Region } from '@/data/madagascarRegions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, Database, AlertCircle, CloudSun, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { HistoricalDataTable } from '@/components/HistoricalDataTable';
 
 const Index = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
@@ -53,7 +54,7 @@ const Index = () => {
     
     if (historicalData.length > 0) {
       const trends = analyzeTrends(historicalData, data);
-      const generatedPredictions = generatePredictions(data, historicalData, trends);
+      const generatedPredictions = generatePredictions(data, historicalData, trends, 7);
       setPredictions(generatedPredictions);
       
       console.log('Tendances analysées:', trends);
@@ -147,6 +148,14 @@ const Index = () => {
               currentWeatherData={currentData}
               isLoadingCurrent={isLoadingCurrent}
             />
+            
+            {/* Tableau des données historiques */}
+            {historicalData.length > 0 && (
+              <HistoricalDataTable 
+                historicalData={historicalData}
+                regionName={selectedRegion?.name}
+              />
+            )}
           </div>
           
           {/* Graphiques et prédictions */}
