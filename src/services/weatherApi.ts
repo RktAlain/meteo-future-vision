@@ -1,3 +1,4 @@
+
 import { Region } from '@/data/madagascarRegions';
 import { WeatherData } from '@/types/weather';
 
@@ -95,8 +96,8 @@ interface HistoricalWeatherApiResponse {
 
 export const fetchCurrentWeather = async (region: Region) => {
   const params = new URLSearchParams({
-    latitude: region.coordinates.lat.toString(),
-    longitude: region.coordinates.lon.toString(),
+    latitude: region.latitude.toString(),
+    longitude: region.longitude.toString(),
     current: 'temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m',
     daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code,sunrise,sunset,uv_index_max',
     timezone: 'Africa/Nairobi',
@@ -118,8 +119,8 @@ export const fetchHistoricalWeather = async (region: Region) => {
   startDate.setFullYear(endDate.getFullYear() - 2);
 
   const params = new URLSearchParams({
-    latitude: region.coordinates.lat.toString(),
-    longitude: region.coordinates.lon.toString(),
+    latitude: region.latitude.toString(),
+    longitude: region.longitude.toString(),
     start_date: startDate.toISOString().split('T')[0],
     end_date: endDate.toISOString().split('T')[0],
     daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code,wind_speed_10m_max,wind_direction_10m_dominant,pressure_msl_mean,cloud_cover_mean',
