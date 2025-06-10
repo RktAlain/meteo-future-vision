@@ -8,6 +8,12 @@ export interface HistoricalWeatherData {
     temperature_2m_max: number[];
     temperature_2m_min: number[];
     precipitation_sum: number[];
+    relative_humidity_2m: number[];
+    surface_pressure: number[];
+    wind_speed_10m_max: number[];
+    wind_direction_10m_dominant: number[];
+    cloud_cover_mean: number[];
+    uv_index_max: number[];
   };
 }
 
@@ -57,15 +63,18 @@ export const convertCurrentToWeatherData = (currentData: CurrentWeatherData): We
 export const fetchHistoricalWeather = async (region: Region): Promise<HistoricalWeatherData> => {
   const endDate = new Date();
   const startDate = new Date();
-  startDate.setDate(endDate.getDate() - 7);
+  startDate.setFullYear(endDate.getFullYear() - 3); // 3 années de données
   
   const formatDate = (date: Date) => date.toISOString().split('T')[0];
   
-  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${region.latitude}&longitude=${region.longitude}&start_date=${formatDate(startDate)}&end_date=${formatDate(endDate)}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Africa%2FNairobi`;
+  // Récupérer plus de paramètres météorologiques pour une meilleure prédiction
+  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${region.latitude}&longitude=${region.longitude}&start_date=${formatDate(startDate)}&end_date=${formatDate(endDate)}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,relative_humidity_2m,surface_pressure,wind_speed_10m_max,wind_direction_10m_dominant,cloud_cover_mean,uv_index_max&timezone=Africa%2FNairobi`;
+  
+  console.log(`Récupération de 3 années de données historiques (${formatDate(startDate)} à ${formatDate(endDate)})`);
   
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error('Erreur lors de la récupération des données météorologiques');
+    throw new Error('Erreur lors de la récupération des données météorologiques historiques');
   }
   
   return response.json();
@@ -94,21 +103,30 @@ export const convertHistoricalToWeatherData = (historicalData: HistoricalWeather
       };
     }
     
-    // Sinon, utiliser les données historiques normalement
+    // Utiliser les données historiques avec toutes les variables disponibles
     const tempMax = daily.temperature_2m_max[index];
     const tempMin = daily.temperature_2m_min[index];
+    const temperature = tempMax && tempMin ? (tempMax + tempMin) / 2 : (currentData?.temperature || 20);
+    
+    // Calculer le point de rosée approximatif
+    const humidity = daily.relative_humidity_2m?.[index] || 60;
+    const dewPoint = temperature - ((100 - humidity) / 5);
     
     return {
-      temperature: tempMax && tempMin ? (tempMax + tempMin) / 2 : (currentData?.temperature || 20),
-      humidity: 60, // Valeur par défaut
-      pressure: 1013, // Valeur par défaut
-      windSpeed: 10, // Valeur par défaut
-      windDirection: 180, // Valeur par défaut
+      temperature: temperature,
+      humidity: humidity,
+      pressure: daily.surface_pressure?.[index] || 1013,
+      windSpeed: daily.wind_speed_10m_max?.[index] || 10,
+      windDirection: daily.wind_direction_10m_dominant?.[index] || 180,
       precipitation: daily.precipitation_sum[index] || 0,
-      cloudCover: daily.precipitation_sum[index] > 0 ? 80 : 30,
-      uvIndex: 5, // Valeur par défaut
-      dewPoint: tempMin ? tempMin - 2 : (currentData?.dewPoint || 12),
+      cloudCover: daily.cloud_cover_mean?.[index] || (daily.precipitation_sum[index] > 0 ? 80 : 30),
+      uvIndex: daily.uv_index_max?.[index] || 5,
+      dewPoint: dewPoint,
       date: new Date(date)
     };
+  }).filter(data => {
+    // Filtrer les données invalides
+    return data.temperature !== null && data.temperature !== undefined && 
+           !isNaN(data.temperature) && data.temperature > -50 && data.temperature < 60;
   });
 };
